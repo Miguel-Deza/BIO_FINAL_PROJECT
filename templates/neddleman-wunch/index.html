@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive demo for Needleman–Wunsch algorithm</title>
+    <meta name="HandheldFriendly" content="True">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style-nw.css') }}" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/GridBuilder.js') }}"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">Interactive demo for Needleman-Wunsch algorithm</h2>
+    <p>
+        Hola Miguel
+    </p>
+    <div class="row">
+        <div class="col-md-6">
+            <form>
+                <div class="form-group row">
+                    <label for="seq_1" class="col-sm-4 col-form-label">Sequence 1</label>
+                    <div class="col-sm-8">
+                        <input id="seq_1" class="form-control seq" value="GATTACA" maxlength="20">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="seq_2" class="col-sm-4 col-form-label">Sequence 2</label>
+                    <div class="col-sm-8">
+                        <input id="seq_2" class="form-control seq" value="GTCGACG" maxlength="20">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="matchScore" class="col-sm-4 col-form-label">Match Score</label>
+                    <div class="col-sm-8">
+                        <input id="matchScore" class="form-control params" type="number" value="1">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="mismatchScore" class="col-sm-4 col-form-label">Mismatch Score</label>
+                    <div class="col-sm-8">
+                        <input id="mismatchScore" class="form-control params" type="number" value="-1">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="gapScore" class="col-sm-4 col-form-label">Gap Score</label>
+                    <div class="col-sm-8">
+                        <input id="gapScore" class="form-control params" type="number" value="-2">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <button type="button" class="btn btn-primary btn-compute">Compute Optimal Alignment</button>
+                        <button type="button" class="btn btn-secondary btn-clear">Clear Path</button>
+                        <button type="button" class="btn btn-info btn-custom">Custom Path</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div id="result" class="mb-4"></div>
+            <div id="cont"></div>
+        </div>
+    </div>
+</div>
+<script>
+function restart(){
+    clear();
+    GridBuilder.highlightOptimal();
+}
+
+function clear(){
+    var cont = $('#cont');
+    var resultContainer = $('#result');
+    var matchScore = parseInt($('#matchScore').val());
+    var mismatchScore = parseInt($('#mismatchScore').val());
+    var gapScore = parseInt($('#gapScore').val());
+    var seqSide = $('#seq_1').val();
+    var seqTop = $('#seq_2').val();
+    
+    GridBuilder.rebuildTable(cont, resultContainer, matchScore, mismatchScore, gapScore, seqSide, seqTop);
+}
+
+$(document).ready(function(){
+    restart();
+
+    $('.seq').keyup(function(){
+        restart();
+    });
+   
+    $('.params').change(function(){
+        restart();
+    });
+    
+    $('.btn-clear').click(function(){
+        clear();
+    });
+
+    $('.btn-compute').click(function(){
+        restart();
+    });
+
+    $('.btn-custom').click(function(){
+        GridBuilder.startCustomPath();
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriz de Puntos</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Generador de Matriz de Puntos</h1>
+        <form id="dotmatrix-form" class="mt-4">
+            <div class="form-group">
+                <label for="seq1">Secuencia 1:</label>
+                <input type="text" id="seq1" name="seq1" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="seq2">Secuencia 2:</label>
+                <input type="text" id="seq2" name="seq2" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Generar Matriz</button>
+        </form>
+        <div id="result" class="mt-4" style="display: none;">
+            <h2 class="text-center">Resultado:</h2>
+            <img id="dotmatrix-image" src="" alt="Matriz de Puntos" class="img-fluid mx-auto d-block">
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $('#dotmatrix-form').on('submit', function(event){
+                event.preventDefault();
+                $.ajax({
+                    url: '/dotmatrix',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(data){
+                        $('#dotmatrix-image').attr('src', 'data:image/png;base64,' + data.image);
+                        $('#result').show(); // Muestra la sección de resultado
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

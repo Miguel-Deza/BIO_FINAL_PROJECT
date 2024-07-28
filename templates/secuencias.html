@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Procesador de Secuencias</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .leyenda-item {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .adn { background-color: #d1ecf1; color: #0c5460; }
+    .arn { background-color: #c3e6cb; color: #155724; }
+    .proteina { background-color: #ffeeba; color: #856404; }
+    .desconocido { background-color: #f8d7da; color: #721c24; }
+    .resultado { padding: 20px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center">Procesador de Secuencias</h1>
+    <form id="secuencia-form" class="mt-4">
+      <div class="form-group">
+        <label for="secuencia">Ingrese la Secuencia (máximo 30 caracteres)</label>
+        <input type="text" class="form-control" id="secuencia" name="secuencia" maxlength="30" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Procesar</button>
+    </form>
+
+    <div class="mt-4 row">
+      <div class="col-md-8">
+        <div id="resultado" class="resultado">
+          <h3>Resultado:</h3>
+          <p id="tipo"></p>
+          <p id="cantidad"></p>
+          <p id="transcripcion"></p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div id="modelo-adn" class="mt-4"></div>
+      </div>
+    </div>
+
+    <div class="mt-5">
+      <h3>Leyenda</h3>
+      <div class="leyenda-item adn">
+        <p><strong>ADN:</strong> Compuesto por los nucleótidos A (Adenina), T (Timina), C (Citosina), y G (Guanina).</p>
+      </div>
+      <div class="leyenda-item arn">
+        <p><strong>ARN:</strong> Compuesto por los nucleótidos A (Adenina), U (Uracilo), C (Citosina), y G (Guanina).</p>
+      </div>
+      <div class="leyenda-item proteina">
+        <p><strong>Proteína:</strong> Compuesto por aminoácidos, representados por letras del alfabeto (excepto B, J, O, U, X, Z).</p>
+      </div>
+      <div class="leyenda-item desconocido">
+        <p><strong>Desconocido:</strong> La secuencia contiene caracteres no reconocidos en las categorías anteriores.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $('#secuencia-form').on('submit', function(event){
+        event.preventDefault();
+        $.ajax({
+          url: '/procesar',
+          method: 'POST',
+          data: $(this).serialize(),
+          success: function(response){
+            var resultadoClass;
+            switch(response.tipo) {
+              case 'ADN':
+                resultadoClass = 'adn';
+                break;
+              case 'ARN':
+                resultadoClass = 'arn';
+                break;
+              case 'Proteína':
+                resultadoClass = 'proteina';
+                break;
+              default:
+                resultadoClass = 'desconocido';
+            }
+            $('#resultado').attr('class', 'resultado ' + resultadoClass);
+            $('#tipo').text('Tipo: ' + response.tipo);
+            $('#cantidad').text('Cantidad de elementos: ' + response.cantidad);
+            $('#transcripcion').text('Transcripción (si aplica): ' + response.transcripcion);
+            if (response.tipo === 'ADN') {
+              $('#modelo-adn').html(`
+                <div class="sketchfab-embed-wrapper">
+                  <iframe title="Partes del ADN" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/bcbb4d4f865b43658f9b49459788e0ff/embed">
+                  </iframe>
+                  <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;">
+                    <a href="https://sketchfab.com/3d-models/partes-del-adn-bcbb4d4f865b43658f9b49459788e0ff?utm_medium=embed&utm_campaign=share-popup&utm_content=bcbb4d4f865b43658f9b49459788e0ff" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">Partes del ADN</a>
+                    by <a href="https://sketchfab.com/etiago12?utm_medium=embed&utm_campaign=share-popup&utm_content=bcbb4d4f865b43658f9b49459788e0ff" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">etiago12</a>
+                    on <a href="https://sketchfab.com?utm_medium=embed&utm_campaign=share-popup&utm_content=bcbb4d4f865b43658f9b49459788e0ff" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">Sketchfab</a>
+                  </p>
+                </div>
+              `);
+            } else if (response.tipo === 'ARN') {
+              $('#modelo-adn').html(`
+                <div class="sketchfab-embed-wrapper">
+                  <iframe title="RNA" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/d3ffd6cc5b13486dbd9285619049d909/embed">
+                  </iframe>
+                  <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;">
+                    <a href="https://sketchfab.com/3d-models/rna-d3ffd6cc5b13486dbd9285619049d909?utm_medium=embed&utm_campaign=share-popup&utm_content=d3ffd6cc5b13486dbd9285619049d909" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">RNA</a>
+                    by <a href="https://sketchfab.com/camiloislas?utm_medium=embed&utm_campaign=share-popup&utm_content=d3ffd6cc5b13486dbd9285619049d909" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">Eduteiment</a>
+                    on <a href="https://sketchfab.com?utm_medium=embed&utm_campaign=share-popup&utm_content=d3ffd6cc5b13486dbd9285619049d909" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">Sketchfab</a>
+                  </p>
+                </div>
+              `);              
+            } else if (response.tipo === 'Proteína') {
+                $('#modelo-adn').html(`
+                    <div class="sketchfab-embed-wrapper">
+                    <iframe title="Protein Structure | PDB ID 6RO4" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking execution-while-out-of-viewport execution-while-not-rendered web-share src="https://sketchfab.com/models/132969122ddc41f7aca94e4792784db4/embed">
+                    </iframe>
+                    <p style="font-size: 13px; font-weight: normal; margin: 5px; color: #4A4A4A;">
+                        <a href="https://sketchfab.com/3d-models/protein-structure-pdb-id-6ro4-132969122ddc41f7aca94e4792784db4?utm_medium=embed&utm_campaign=share-popup&utm_content=132969122ddc41f7aca94e4792784db4" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">Protein Structure | PDB ID 6RO4</a>
+                        by <a href="https://sketchfab.com/AlexSigaras?utm_medium=embed&utm_campaign=share-popup&utm_content=132969122ddc41f7aca94e4792784db4" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">Alexandros Sigaras</a>
+                        on <a href="https://sketchfab.com?utm_medium=embed&utm_campaign=share-popup&utm_content=132969122ddc41f7aca94e4792784db4" target="_blank" rel="nofollow" style="font-weight: bold; color: #1CAAD9;">Sketchfab</a>
+                    </p>
+                    </div>
+                `);
+                }            
+            else {
+              $('#modelo-adn').html('');
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
