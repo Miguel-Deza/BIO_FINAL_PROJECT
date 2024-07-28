@@ -92,32 +92,32 @@ td{
 }
 
 #grid td.s {
-    background-image:url('/static/images/s.png');
+    background-image:url('images/s.png');
     border:1px solid black;
 }
 
 #grid td.u {
-    background-image:url('/static/images/u.png');
+    background-image:url('images/u.png');
     border:1px solid black;
 }
 
 #grid td.d {
-    background-image:url('/static/images/d.png');
+    background-image:url('images/d.png');
     border:1px solid black;
 }
 
 #grid td.d.s {
-    background-image:url('/static/images/ds.png');
+    background-image:url('images/ds.png');
 }
 
 #grid td.d.u {
-    background-image:url('/static/images/du.png');
+    background-image:url('images/du.png');
 }
 
 #grid td.s.u {
-    background-image:url('/static/images/su.png');
+    background-image:url('images/su.png');
 }
 
 #grid td.d.s.u {
-    background-image:url('/static/images/dsu.png');
+    background-image:url('images/dsu.png');
 }
