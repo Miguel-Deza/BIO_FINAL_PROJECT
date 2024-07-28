@@ -7,6 +7,15 @@ import io
 import base64
 from Bio.SubsMat import MatrixInfo as matlist
 
+
+# test
+from Bio.Align import substitution_matrices
+from Bio import pairwise2
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio import SeqIO
+import os
+
 app = Flask(__name__)
 
 
@@ -125,6 +134,34 @@ def dotmatrix():
 @app.route('/nw')
 def nw():
     return render_template('neddleman-wunch/index.html')
+
+
+#####################################################
+######### Alineamiento proteínas (usar Blosum o Pam) - FASTA ############
+#####################################################
+
+blosum62 = substitution_matrices.load("BLOSUM62")
+
+
+def align_sequences(seq1, seq2):
+    alignments = pairwise2.align.globalds(seq1, seq2, blosum62, -10, -0.5)
+    best_alignment = alignments[0]
+    return best_alignment
+
+
+@app.route('/blosum', methods=['GET', 'POST'])
+def blosum():
+    if request.method == 'POST':
+        seq1 = request.form['sequence1']
+        seq2 = request.form['sequence2']
+        alignment = align_sequences(seq1, seq2)
+        return render_template('blosum.html', alignment=alignment, seq1=seq1, seq2=seq2)
+    return render_template('blosum.html')
+
+#####################################################
+######### Alineamiento proteínas (usar Blosum o Pam) - FASTA ############
+#####################################################
+
 
 #####################################################
 ######### Final ############
