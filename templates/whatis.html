@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identify Sequence Type</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .adn {
+            color: #4caf50;
+        }
+        .arn {
+            color: #2196f3;
+        }
+        .protein {
+            color: #ff5722;
+        }
+        .unknown {
+            color: #9e9e9e;
+        }
+        .result img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Identify Sequence Type</h1>
+        <form method="post">
+            <div class="form-group">
+                <label for="sequence">Enter Sequence</label>
+                <input type="text" class="form-control" id="sequence" name="sequence" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+        </form>
+        {% if sequence_type %}
+        <div class="result text-center">
+            <h2 class="{% if sequence_type == 'ADN' %}adn{% elif sequence_type == 'ARN' %}arn{% elif sequence_type == 'Proteína' %}protein{% else %}unknown{% endif %}">
+                The sequence is {{ sequence_type }}
+            </h2>
+            {% if sequence_type == 'ADN' %}
+            <img src="https://www.proferecursos.com/wp-content/uploads/Que-es-el-ADN.jpg" alt="ADN">
+            {% elif sequence_type == 'ARN' %}
+            <img src="https://www.proferecursos.com/wp-content/uploads/Que-es-el-ARN.jpg" alt="ARN">
+            {% elif sequence_type == 'Proteína' %}
+            <img src="https://www.proferecursos.com/wp-content/uploads/Que-es-una-Proteina.jpg" alt="Proteína">
+            {% else %}
+            <img src="https://cdn-icons-png.flaticon.com/512/1179/1179196.png" alt="No Identificado">
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

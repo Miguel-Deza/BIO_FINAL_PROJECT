@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Home</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+      justify-content: center;
+    }
+      body {
+        padding-top: 4.5rem;
+      }
+      .animated-link {
+        transition: transform 0.3s, color 0.3s;
+      }
+      .animated-link:hover {
+        transform: scale(1.1);
+        color: #fff !important;
+      }
+      .section-title {
+        margin-top: 2rem;
+      }
+      .card {
+        margin-bottom: 1.5rem;
+      }
+      .card-header {
+        color: white;
+      }
+      .section-1 {
+        background-color: #d1ecf1;
+      }
+      .section-2 {
+        background-color: #d4edda;
+      }
+      .section-3 {
+        background-color: #fff3cd;
+      }
+      .section-4 {
+        background-color: #f8d7da;
+      }
+      .section-5 {
+        background-color: #e2e3e5;
+      }
+      .section-1 .card-header,
+      .section-2 .card-header,
+      .section-3 .card-header,
+      .section-4 .card-header,
+      .section-5 .card-header {
+        color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand" href="#">BIOINFORMATICA - PROYECTO FINAL</a>
+    </nav>
+
+    <main role="main" class="container">
+      <h1 class="mb-4">ÍNDICE DE LO SOLICITADO</h1>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card section-1">
+            <div class="card-header">
+              Secuencia
+            </div>
+            <div class="card-body">
+              <ul>
+                <li class="animated-link"><a href="/secuencias">General - Cantidad de elementos y transcripción si aplica</a></li>
+                <li class="animated-link"><a href="/whatis">¿Qué tipo es? ADN, ARN o proteína</a></li>
+                <li class="animated-link"><a href="/cantidadelementos">Cantidad de elementos</a></li>
+                <li class="animated-link"><a href="/is_possible_transcription">Transcripción (ADN -> ARN)</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card section-2">
+            <div class="card-header">
+              Alineamiento múltiple
+            </div>
+            <div class="card-body">
+              <ul>
+                <li class="animated-link"><a href="/estrella">Alineamiento Estrella</a></li>
+                <li class="animated-link"><a href="/nj">NJ</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card section-4">
+            <div class="card-header">
+              Clusterización
+            </div>
+            <div class="card-body">
+              <ul>
+                <li class="animated-link"><a href="/clusterizacion">Aglomerativo</a></li>
+                <li class="animated-link"><a href="#">max</a></li>
+                <li class="animated-link"><a href="#">min</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card section-3">
+            <div class="card-header">
+              Alineamiento de dos secuencias
+            </div>
+            <div class="card-body">
+              <ul>
+                <li class="animated-link"><a href="/matrizPuntos">Matriz de punto</a></li>
+                <li class="animated-link"><a href="#">Alineamiento global (que se pueda variar las penalizaciones)</a></li>
+                <li class="animated-link"><a href="/sw">Alineamiento local</a></li>
+                <li class="animated-link"><a href="/blosum">Alineamiento proteínas (usar Blosum o Pam) - FASTA</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card section-5">
+            <div class="card-header">
+              Filogenia
+            </div>
+            <div class="card-body">
+              <ul>
+                <li class="animated-link"><a href="/upgma">Creación de un árbol enraizado (diagrama), lo haré usando UPGMA</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card section-1">
+            <div class="card-header">
+              Estructura Secundaria
+            </div>
+            <div class="card-body">
+              <ul>
+                <li class="animated-link"><a href="/secondary">watson - crick (diagrama e indicación de las formaciones)</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

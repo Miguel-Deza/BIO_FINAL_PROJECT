@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequence Element Counter</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .header {
+            background-color: #17a2b8;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .form-control {
+            border-radius: 5px;
+            border: 2px solid #17a2b8;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header text-center">
+            <h1>Sequence Element Counter</h1>
+        </div>
+        <form method="post" class="mt-4">
+            <div class="form-group">
+                <label for="sequence">Enter your sequence (ARN, ADN, or Protein):</label>
+                <textarea class="form-control" id="sequence" name="sequence" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Count Elements</button>
+        </form>
+        {% if sequence %}
+        <div class="result text-center mt-4">
+            <h3>Sequence: {{ sequence }}</h3>
+            <p>Number of elements: <strong>{{ count }}</strong></p>
+        </div>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

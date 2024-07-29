@@ -87,7 +87,7 @@
             $('#resultado').attr('class', 'resultado ' + resultadoClass);
             $('#tipo').text('Tipo: ' + response.tipo);
             $('#cantidad').text('Cantidad de elementos: ' + response.cantidad);
-            $('#transcripcion').text('Transcripción (si aplica): ' + response.transcripcion);
+            $('#transcripcion').text('Transcripción: ' + response.transcripcion);
             if (response.tipo === 'ADN') {
               $('#modelo-adn').html(`
                 <div class="sketchfab-embed-wrapper">

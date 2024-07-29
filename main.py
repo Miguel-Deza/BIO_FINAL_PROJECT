@@ -80,6 +80,62 @@ def procesar():
 
 
 #####################################################
+############# What is ################
+#####################################################
+def determine_sequence_type(sequence):
+    sequence = sequence.upper()
+    if set(sequence).issubset({"A", "T", "C", "G"}):
+        return "ADN"
+    elif set(sequence).issubset({"A", "U", "C", "G"}):
+        return "ARN"
+    elif set(sequence).issubset({"A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"}):
+        return "Proteína"
+    else:
+        return "No Identificado"
+
+@app.route('/whatis', methods=['GET', 'POST'])
+def whatis():
+    sequence_type = None
+    if request.method == 'POST':
+        sequence = request.form['sequence']
+        sequence_type = determine_sequence_type(sequence)
+    return render_template('whatis.html', sequence_type=sequence_type)
+
+#####################################################
+############# Cantidad elementos ################
+#####################################################
+@app.route('/cantidadelementos', methods=['GET', 'POST'])
+def cantidadelementos():
+    sequence = ""
+    count = 0
+    if request.method == 'POST':
+        sequence = request.form['sequence']
+        count = len(sequence)
+
+    return render_template('cantidadelementos.html', sequence=sequence, count=count)
+
+#####################################################
+############# Is posible transcription ################
+#####################################################
+
+def is_possible_transcription(dna_sequence):
+    valid_nucleotides = {'A', 'T', 'C', 'G'}
+    for nucleotide in dna_sequence:
+        if nucleotide not in valid_nucleotides:
+            return False, f"El nucleótido '{nucleotide}' no es válido."
+    transcription = dna_sequence.replace('T', 'U')
+    return True, transcription
+
+@app.route('/is_possible_transcription', methods=['GET', 'POST'])
+def is_possible_transcription_route():
+    if request.method == 'POST':
+        dna_sequence = request.form['dna_sequence'].upper()
+        is_valid, result = is_possible_transcription(dna_sequence)
+        return render_template('is_possible_transcription.html', is_valid=is_valid, result=result, dna_sequence=dna_sequence)
+    return render_template('is_possible_transcription.html', is_valid=None)
+
+
+#####################################################
 ######### Matriz puntos ###############
 #####################################################
 
@@ -1048,6 +1104,39 @@ def secondary():
 ######### Final ############
 #####################################################
 
+# Aquí puedes listar las rutas que permiten GET
+def list_routes(app):
+    output = []
+    for rule in app.url_map.iter_rules():
+        methods = rule.methods
+        if 'GET' in methods:
+            output.append({
+                'endpoint': rule.endpoint,
+                'methods': ','.join(methods),
+                'rule': rule.rule
+            })
+
+    for route in output:
+        print(f"Endpoint: {route['endpoint']}\nMethods: {route['methods']}\nRule: {route['rule']}\n")
+
+@app.route('/')
+def home():
+    # Lista de rutas disponibles
+    routes = [
+        {'endpoint': 'clusterizacion', 'rule': '/clusterizacion'},
+        {'endpoint': 'matrizPuntos', 'rule': '/matrizPuntos'},
+        {'endpoint': 'secuencias', 'rule': '/secuencias'},
+        {'endpoint': 'secondary', 'rule': '/secondary'},
+        {'endpoint': 'estrella', 'rule': '/estrella'},
+        {'endpoint': 'blosum', 'rule': '/blosum'},
+        {'endpoint': 'upgma', 'rule': '/upgma'},
+        {'endpoint': 'nw', 'rule': '/nw'},
+        {'endpoint': 'sw', 'rule': '/sw'},
+        {'endpoint': 'nj', 'rule': '/nj'}
+    ]
+    
+    return render_template('home.html', routes=routes)
 
 if __name__ == '__main__':
+    list_routes(app)
     app.run(debug=True)
