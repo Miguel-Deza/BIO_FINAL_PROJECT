@@ -1,6 +1,5 @@
 var GridBuilder = (function () {
     "use strict";
-    //Some instance variables
     var mIsFirstCall = true,
         mSelf = null,
         mCurrentPath = [],
@@ -19,19 +18,14 @@ var GridBuilder = (function () {
         mGapScore = 0;
 
     function onCellClicked(dom, x, y) {
-
         x = parseInt(x, 10);
         y = parseInt(y, 10);
 
         var lastElement = null;
         if (mCurrentPath !== null && mCurrentPath.length !== 0) {
-            //If we are not in an empty path, check to see if this is an allowed move
-            //We can move one step up, right, or diagonally up and to the right from any point on the grid 
             lastElement = mCurrentPath[mCurrentPath.length - 1];
 
             if (dom.hasClass('in-path')) {
-
-                //Just on entry? Clear path
                 if (mCurrentPath.length === 1) {
                     mCurrentPath[0].dom.removeClass('in-path');
                     mCurrentPath[0].dom.removeClass('is-last');
@@ -47,13 +41,12 @@ var GridBuilder = (function () {
                     mCurrentPath[i].dom.removeClass('is-last');
                     mCurrentPath[i].dom.removeAttr('data-index');
                 }
-                mCurrentPath.splice(indexInPath + 1, mCurrentPath.length - indexInPath + 1);
+                mCurrentPath.splice(indexInPath + 1, mCurrentPath.length - indexInPath);
                 mCurrentPath[mCurrentPath.length - 1].dom.addClass('is-last');
                 onPathUpdate();
                 return true;
             }
 
-            //An attempt to move in the wrong direction
             if (lastElement.x < x || lastElement.y < y) {
                 return false;
             }
@@ -88,42 +81,39 @@ var GridBuilder = (function () {
         var alignedSideSeq = '';
 
         $('th').removeClass('included');
-        
+
         for (var i = mCurrentPath.length - 1; i >= 0; i--) {
             var currentCell = mCurrentPath[i];
             var nextCell = (i > 0) ? mCurrentPath[i - 1] : null;
-            var topChar = mTopSequence[currentCell.x];
-            var sideChar = mSideSequence[currentCell.y];
-            
+            var topChar = mTopSequence[currentCell.x - 1];
+            var sideChar = mSideSequence[currentCell.y - 1];
+
             if (!nextCell) {
                 continue;
             }
 
             if (topChar) {
                 if (currentCell.x != nextCell.x) {
-                    $('#top_seq_' + (currentCell.x)).addClass('included');
+                    $('#top_seq_' + (currentCell.x - 1)).addClass('included');
                 }
             }
 
             if (sideChar) {
                 if (currentCell.y != nextCell.y) {
-                    $('#side_seq_' + (currentCell.y)).addClass('included');
+                    $('#side_seq_' + (currentCell.y - 1)).addClass('included');
                 }
             }
 
-            //Diagonal move
             if (nextCell.x - currentCell.x > 0 && nextCell.y - currentCell.y > 0) {
                 alignedTopSeq += topChar;
                 alignedSideSeq += sideChar;
                 continue;
             }
 
-            //Horizontal move
             if (nextCell.x - currentCell.x > 0) {
                 sideChar = mGapSymbol;
             }
 
-            //Vertical move
             if (nextCell.y - currentCell.y > 0) {
                 topChar = mGapSymbol;
             }
@@ -164,7 +154,12 @@ var GridBuilder = (function () {
         $tr.append($('<td colspan="1500" class="score" />').html("Score = " + score));
         $table.append($tr);
 
-        mDomResultContainer.append($table);
+        // mDomResultContainer.append($table);
+
+        // Update result with aligned sequences
+        $('#alignedSeq1').text(alignedTopSeq);
+        $('#alignedSeq2').text(alignedSideSeq);
+        $('#maxScore').text("Maximum Score: " + score);
     }
 
     function displayTooltip(text, x, y) {
@@ -260,7 +255,7 @@ var GridBuilder = (function () {
         for (var idx in mTopSequence) {
             idx = parseInt(idx, 10);
             var dataPointIndex = (idx + 1) + '_' + (charIndex + 1);
-            
+
             var cssClasses = "";
             if (n > 0) {
                 cssClasses = getCssClassesFromDirection(mCellMap[(idx + 1) + "_" + (charIndex + 1)].direction);
@@ -325,19 +320,19 @@ var GridBuilder = (function () {
             if (mIsCustomPathMode) {
                 return;
             }
-            
+
             var self = $(this);
             var x = self.attr('data-x');
             var y = self.attr('data-y');
-            
+
             if (x < 1 || y < 1) {
                 return;
             }
             $("#side_seq_" + (y - 1)).addClass('highlight');
             $("#top_seq_" + (x - 1)).addClass('highlight');
-            
+
             showTooltip(x, y);
-        
+
         }, function() {
             $(".seq-header").removeClass('highlight');
             $('#grid td').removeClass('highlight');
@@ -350,14 +345,14 @@ var GridBuilder = (function () {
             if (!self.hasClass("seq-header")) {
                 return;
             }
-            
+
             var pos = self.offset();
             var topMargin = self.hasClass("side-header") ? self.height() / 4 : self.height() + 4;
             var leftMargin = self.hasClass("side-header") ? self.width() + 4 : 0;
             var text = self.hasClass("included") ? "Included In Alignment" : "Not Included In Alignment";
-            
+
             displayTooltip(text, pos.left + leftMargin, pos.top + topMargin);
-            
+
         }, function() {
             hideTooltip();
         });
@@ -381,14 +376,20 @@ var GridBuilder = (function () {
                 }
             }
 
+            var alignedTopSeq = '';
+            var alignedSideSeq = '';
+
             var currentX = maxX;
             var currentY = maxY;
             while (currentX > 0 && currentY > 0 && mPathTable[currentX][currentY] > 0) {
                 var currentCell = mCellMap[currentX + '_' + currentY];
                 var currentDom = $('#' + currentX + '_' + currentY);
 
+                alignedTopSeq = mTopSequence[currentX - 1] + alignedTopSeq;
+                alignedSideSeq = mSideSequence[currentY - 1] + alignedSideSeq;
+
                 currentDom.click();
-                
+
                 var direction = null;
                 if (currentCell.direction) {
                     direction = currentCell.direction[currentCell.direction.length - 1];
@@ -397,9 +398,11 @@ var GridBuilder = (function () {
                 switch (direction) {
                     case 's':
                         currentX--;
+                        alignedSideSeq = mGapSymbol + alignedSideSeq;
                         break;
                     case 'u':
                         currentY--;
+                        alignedTopSeq = mGapSymbol + alignedTopSeq;
                         break;
                     case 'd':
                         currentX--;
@@ -409,6 +412,10 @@ var GridBuilder = (function () {
                         break;
                 }
             }
+
+            $('#alignedSeq1').text(alignedTopSeq);
+            $('#alignedSeq2').text(alignedSideSeq);
+            $('#maxScore').text("Maximum Score: " + maxScore);
         },
 
         startCustomPath: function() {
@@ -439,8 +446,10 @@ var GridBuilder = (function () {
             var width = mTopSequence.length + 1;
             var height = mSideSequence.length + 1;
 
+            mPathTable = new Array(width).fill(0).map(() => new Array(height).fill(0));
+            mCellMap = {};
+
             for (var i = 0; i < width; i++) {
-                mPathTable[i] = [];
                 for (var j = 0; j < height; j++) {
                     if (i === 0 || j === 0) {
                         mPathTable[i][j] = 0;
@@ -462,11 +471,11 @@ var GridBuilder = (function () {
                     if (mPathTable[i][j] === moveDgScore) {
                         direction.push('d');
                     }
-                    
+
                     if (mPathTable[i][j] === moveUpScore) {
                         direction.push('u');
                     }
-                    
+
                     if (mPathTable[i][j] === moveSdScore) {
                         direction.push('s');
                     }
@@ -474,12 +483,7 @@ var GridBuilder = (function () {
                     mCellMap[i + "_" + j] = {
                         'sideScoreText': mPathTable[i - 1][j] + " + " + gapScore + " (The Gap score) = " + moveSdScore,
                         'upScoreText': mPathTable[i][j - 1] + " + " + gapScore + " (The Gap score) = " + moveUpScore,
-                        'diagonalScoreText': mPathTable[i - 1][j - 1]  + " + " +  
-                            comparisonScore +
-                            " (Due to a " + (isMatch ? "match" : "mismatch") +
-                            " between " + mTopSequence[i - 1] + " & " + mSideSequence[j - 1] + ") " +
-                            " = " +
-                            moveDgScore,
+                        'diagonalScoreText': mPathTable[i - 1][j - 1] + " + " + comparisonScore + " (Due to a " + (isMatch ? "match" : "mismatch") + " between " + mTopSequence[i - 1] + " & " + mSideSequence[j - 1] + ") = " + moveDgScore,
                         'sideScore': moveSdScore,
                         'upScore': moveUpScore,
                         'diagonalScore': moveDgScore,

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Demo for Needleman–Wunsch Algorithm</title>
+    <title>Interactive Demo for Smith-Waterman Algorithm</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -13,7 +13,7 @@
 
 <div class="container mt-5">
     <div class="text-center mb-4">
-        <h2 class="text-primary">SMITH WATERMAN</h2>
+        <h2 class="text-primary">SMITH-WATERMAN</h2>
         <p>Hola Miguel</p>
     </div>
 
@@ -54,7 +54,11 @@
                     <button class="btn btn-warning btn-custom">Custom Path</button>
                 </div>
             </div>
-            <div id="result" class="card p-4 mt-3"></div>
+            <div id="result" class="card p-4 mt-3">
+                <div id="maxScore" class="mb-3">Maximum Score: </div>
+                <div>Aligned Sequence 1: <span id="alignedSeq1"></span></div>
+                <div>Aligned Sequence 2: <span id="alignedSeq2"></span></div>
+            </div>
         </div>
 
         <div class="col-md-6 d-flex align-items-center justify-content-center">            
