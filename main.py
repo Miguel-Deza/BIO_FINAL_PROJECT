@@ -332,8 +332,8 @@ def estrella():
 #####################################################
 ######### CLUSTERIZACIÓN ############
 #####################################################
-@app.route('/')
-def index():
+@app.route('/clusterizacion')
+def clusterizacion():
     return render_template('form.html')
 
 
