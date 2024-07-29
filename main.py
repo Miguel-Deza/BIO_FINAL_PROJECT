@@ -301,8 +301,8 @@ def star_alignment(sequences):
     return star_pos, best_score, pair_scores, star_alignments, alignments, scores
 
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/estrella', methods=['GET', 'POST'])
+def estrella():
     alignments = None
     star_alignments = None
     pair_scores = None
@@ -315,7 +315,7 @@ def index():
         sequences = [seq.strip() for seq in sequences]
         star_pos, best_score, pair_scores, star_alignments, alignments, scores = star_alignment(
             sequences)
-    return render_template('index.html', sequences=sequences, star_pos=star_pos, best_score=best_score, pair_scores=pair_scores, star_alignments=star_alignments, alignments=alignments, scores=scores)
+    return render_template('estrella.html', sequences=sequences, star_pos=star_pos, best_score=best_score, pair_scores=pair_scores, star_alignments=star_alignments, alignments=alignments, scores=scores)
 
 
 #####################################################
