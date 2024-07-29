@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Hierarchical Clustering Results</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+            color: #495057;
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-5 animate__animated animate__fadeInDown">Clustering Results</h1>
+        <div class="card mb-3 animate__animated animate__fadeInUp">
+            <div class="card-body">
+                <h5 class="card-title">Method used: {{ method }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Cophenetic Correlation Coefficient: {{ ccc }}</h6>
+                
+                <ul class="nav nav-tabs" id="resultsTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="clusters-tab" data-toggle="tab" href="#clusters" role="tab" aria-controls="clusters" aria-selected="true">Clusters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="distances-tab" data-toggle="tab" href="#distances" role="tab" aria-controls="distances" aria-selected="false">Minimum Distances</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="matrix-tab" data-toggle="tab" href="#matrix" role="tab" aria-controls="matrix" aria-selected="false">Cophenetic Matrix</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="dendrogram-tab" data-toggle="tab" href="#dendrogram" role="tab" aria-controls="dendrogram" aria-selected="false">Dendrogram</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="resultsTabContent">
+                    <div class="tab-pane fade show active" id="clusters" role="tabpanel" aria-labelledby="clusters-tab">
+                        <h5 class="mt-4">Clusters</h5>
+                        <ul class="list-group">
+                            {% for cluster in clusters %}
+                                <li class="list-group-item">{{ cluster }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="distances" role="tabpanel" aria-labelledby="distances-tab">
+                        <h5 class="mt-4">Minimum Distances</h5>
+                        <ul class="list-group">
+                            {% for dist in min_distances %}
+                                <li class="list-group-item">{{ dist }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="tab-pane fade" id="matrix" role="tabpanel" aria-labelledby="matrix-tab">
+                        <h5 class="mt-4">Cophenetic Matrix</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    {% for row in cophenetic_matrix %}
+                                        <tr>
+                                            {% for val in row %}
+                                                <td>{{ val }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="dendrogram" role="tabpanel" aria-labelledby="dendrogram-tab">
+                        <h5 class="mt-4">Dendrogram</h5>
+                        <img src="{{ url_for('static', filename='images/combined_dendrograms.png') }}" class="img-fluid" alt="Dendrogram">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/" class="btn btn-secondary btn-block animate__animated animate__fadeInUp">Back to Input</a>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

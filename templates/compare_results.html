@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Hierarchical Clustering Comparison Results</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+            color: #495057;
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+        }
+        .card-columns {
+            column-count: 1;
+        }
+        @media (min-width: 576px) {
+            .card-columns {
+                column-count: 2;
+            }
+        }
+        @media (min-width: 768px) {
+            .card-columns {
+                column-count: 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-5 animate__animated animate__fadeInDown">Comparison of Clustering Methods</h1>
+        <div class="card mb-3 animate__animated animate__fadeInUp">
+            <div class="card-body">
+                <h5 class="card-title">Best Method: {{ best_method }} (CCC: {{ best_ccc }})</h5>
+                
+                <ul class="nav nav-tabs" id="resultsTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="comparison-tab" data-toggle="tab" href="#comparison" role="tab" aria-controls="comparison" aria-selected="true">Comparison Results</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="dendrograms-tab" data-toggle="tab" href="#dendrograms" role="tab" aria-controls="dendrograms" aria-selected="false">Dendrograms</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="resultsTabContent">
+                    <div class="tab-pane fade show active" id="comparison" role="tabpanel" aria-labelledby="comparison-tab">
+                        <div class="card-columns mt-4">
+                            {% for method, result in results.items() %}
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ method }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">CCC: {{ result[4] }}</h6>
+                                    <h6 class="mt-3">Clusters Merged</h6>
+                                    <ul class="list-group mb-3">
+                                        {% for cluster in result[0] %}
+                                            <li class="list-group-item p-1">{{ cluster }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <h6 class="mt-3">Min Distances</h6>
+                                    <ul class="list-group mb-3">
+                                        {% for dist in result[2] %}
+                                            <li class="list-group-item p-1">{{ dist }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <h6 class="mt-3">Cophenetic Matrix</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered">
+                                            <tbody>
+                                                {% for row in result[3] %}
+                                                    <tr>
+                                                        {% for val in row %}
+                                                            <td>{{ val }}</td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="dendrograms" role="tabpanel" aria-labelledby="dendrograms-tab">
+                        <h5 class="mt-4">Dendrograms</h5>
+                        <img src="{{ url_for('static', filename='images/combined_dendrograms.png') }}" class="img-fluid" alt="Dendrograms" style="width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/" class="btn btn-secondary btn-block animate__animated animate__fadeInUp">Back to Input</a>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

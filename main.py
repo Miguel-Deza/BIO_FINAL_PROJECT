@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from Bio.SubsMat import MatrixInfo as matlist
+from scipy.cluster.hierarchy import dendrogram
 
 
 # test
@@ -15,6 +16,8 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO
 import os
+
+from clustering import hierarchical_clustering, compute_cophenetic_coefficient, draw_dendrograms
 
 app = Flask(__name__)
 
@@ -317,6 +320,77 @@ def estrella():
             sequences)
     return render_template('estrella.html', sequences=sequences, star_pos=star_pos, best_score=best_score, pair_scores=pair_scores, star_alignments=star_alignments, alignments=alignments, scores=scores)
 
+#####################################################
+######### BLOSUM ############
+#####################################################
+
+#####################################################
+######### ARBOL ENRAIZADO ############
+#####################################################
+
+
+#####################################################
+######### CLUSTERIZACIÓN ############
+#####################################################
+@app.route('/')
+def index():
+    return render_template('form.html')
+
+
+@app.route('/results', methods=['POST'])
+def results():
+    data = request.form['matrix']
+    method = request.form['method']
+
+    # Convert the input string into a matrix
+    distance_matrix = np.array(
+        [[float(num) for num in line.split()] for line in data.strip().split('\n')])
+
+    if method == 'Compare':
+        # Compare all methods
+        methods = ['Minimum', 'Maximum', 'Average']
+        results = {}
+        clusters_list = []
+        distances_list = []
+
+        for method in methods:
+            clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(
+                distance_matrix, method)
+            ccc = compute_cophenetic_coefficient(
+                distance_matrix, cophenetic_matrix)
+            results[method] = (clustering_result, matrices,
+                               min_distances, cophenetic_matrix, ccc)
+            clusters_list.append(clustering_result)
+            distances_list.append(min_distances)
+
+        best_method = max(results, key=lambda m: results[m][4])
+        best_ccc = results[best_method][4]
+
+        # Draw the dendrogram
+        draw_dendrograms(clusters_list, distances_list, methods,
+                         save_filename='static/images/combined_dendrograms.png')
+
+        return render_template('compare_results.html',
+                               results=results,
+                               best_method=best_method,
+                               best_ccc=best_ccc)
+    else:
+        # Perform clustering for the selected method
+        clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(
+            distance_matrix, method)
+        ccc = compute_cophenetic_coefficient(
+            distance_matrix, cophenetic_matrix)
+
+        # Draw the dendrogram
+        draw_dendrograms([clustering_result], [min_distances], [
+                         method], save_filename='static/images/combined_dendrograms.png')
+
+        return render_template('results.html',
+                               clusters=clustering_result,
+                               min_distances=min_distances,
+                               cophenetic_matrix=cophenetic_matrix,
+                               ccc=ccc,
+                               method=method)
 
 #####################################################
 ######### Final ############
