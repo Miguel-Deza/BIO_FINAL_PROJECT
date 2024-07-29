@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Alignment</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+        .fade-in {
+            animation: fadeIn 2s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Star Alignment</h1>
+        <form method="post">
+            <div class="form-group">
+                <label for="sequences">Enter sequences separated by new line:</label>
+                <textarea class="form-control" id="sequences" name="sequences" rows="10" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+        </form>
+
+        {% if sequences %}
+        <div class="fade-in">
+            <h2 class="mt-5">Input Sequences:</h2>
+            <ul class="list-group">
+                {% for sequence in sequences %}
+                <li class="list-group-item">{{ sequence }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if pair_scores %}
+        <div class="fade-in">
+            <h2 class="mt-5">Matrix of Scores:</h2>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th></th>
+                            {% for i in range(pair_scores|length - 1) %}
+                            <th>S{{ i + 1 }}</th>
+                            {% endfor %}
+                            <th>Total Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in range(pair_scores|length - 1) %}
+                        <tr>
+                            <th>S{{ i + 1 }}</th>
+                            {% for j in range(pair_scores|length - 1) %}
+                            <td>{{ pair_scores[i][j] }}</td>
+                            {% endfor %}
+                            <td>{{ scores[i] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if best_score %}
+        <div class="fade-in">
+            <h2 class="mt-5">Maximum Score Obtained:</h2>
+            <p class="lead"><strong>Sequence S{{ star_pos + 1 }}</strong> with a score of <strong>{{ best_score }}</strong></p>
+        </div>
+        {% endif %}
+
+        {% if star_alignments %}
+        <div class="fade-in">
+            <h2 class="mt-5">Alignments with Star Sequence:</h2>
+            <ul class="list-group">
+                {% for star_alignment in star_alignments %}
+                <li class="list-group-item">
+                    <strong>S{{ star_alignment[2] + 1 }}</strong>:<br>
+                    {{ star_alignment[0] }}<br>
+                    {{ star_alignment[1] }}<br>
+                    <strong>Score: </strong>{{ star_alignment[3] }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if alignments %}
+        <div class="fade-in">
+            <h2 class="mt-5">Multiple Alignment:</h2>
+            <ul class="list-group">
+                {% for i in range(alignments|length) %}
+                <li class="list-group-item"><strong>S{{ i + 1 }}</strong>: {{ alignments[i] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -40,8 +40,8 @@ def transcribir_adn_a_arn(secuencia):
     return secuencia.replace('T', 'U')
 
 
-@app.route('/')
-def index():
+@app.route('/secuencias')
+def secuencias():
     return render_template('secuencias.html')
 
 
@@ -161,6 +161,161 @@ def blosum():
 #####################################################
 ######### Alineamiento proteínas (usar Blosum o Pam) - FASTA ############
 #####################################################
+
+#####################################################
+######### START Alignment ############
+#####################################################
+
+
+# Penalizaciones
+gap = -2
+match = 1
+mismatch = -1
+
+# Extraer la matriz de alineación y máximo score de dos alineaciones (Needleman Wunsch parcial)
+
+
+def max_score(seq_1, seq_2):
+    left, up = (seq_1, seq_2) if len(seq_1) > len(seq_2) else (seq_2, seq_1)
+
+    matrix = [[0 for j in range(len(up)+1)] for i in range(len(left)+1)]
+    for i in range(len(matrix)):
+        matrix[i][0] = i*gap
+    for j in range(len(matrix[0])):
+        matrix[0][j] = j*gap
+
+    for i in range(1, len(matrix)):
+        for j in range(1, len(matrix[0])):
+            matrix[i][j] = max(matrix[i-1][j-1]+(match if left[i-1] == up[j-1]
+                               else mismatch), matrix[i-1][j]+gap, matrix[i][j-1]+gap)
+    return matrix, matrix[-1][-1]
+
+# Extraer la posición de la cadena estrella
+
+
+def get_star_pos(sequences):
+    pair_scores = [[0 for j in range(len(sequences)+1)]
+                   for i in range(len(sequences)+1)]
+    pair_matrices = [[[] for j in range(len(sequences)+1)]
+                     for i in range(len(sequences)+1)]
+    best_score = float("-inf")
+    best_score_pos = -1
+
+    for i in range(len(sequences)):
+        for j in range(i, len(sequences)):
+            if i == j:
+                continue
+            matrix, score = max_score(sequences[i], sequences[j])
+            pair_matrices[i][j] = matrix
+            pair_matrices[j][i] = matrix
+
+            pair_scores[i][j] = score
+            pair_scores[j][i] = score
+        pair_scores[i][len(sequences)] = sum(pair_scores[i])
+        pair_scores[len(sequences)][i] = pair_scores[i][len(sequences)]
+
+        if pair_scores[i][len(sequences)] > best_score:
+            best_score = pair_scores[i][len(sequences)]
+            best_score_pos = i
+
+    scores = [pair_scores[i][len(sequences)] for i in range(len(sequences))]
+
+    return best_score_pos, best_score, pair_scores, pair_matrices, scores
+
+# Obtener una alineación óptima de 2 secuencias en base a su matriz de alineación
+
+
+def align_sequences(seq_1, seq_2, matrix):
+    AlignmentA = ""
+    AlignmentB = ""
+    i = len(seq_1)
+    j = len(seq_2)
+
+    while i > 0 and j > 0:
+        Score = matrix[i][j]
+        ScoreDiag = matrix[i-1][j-1] if i > 0 and j > 0 else float('-inf')
+        ScoreUp = matrix[i][j-1] if j > 0 else float('-inf')
+        ScoreLeft = matrix[i-1][j] if i > 0 else float('-inf')
+
+        if Score == ScoreDiag + (match if seq_1[i-1] == seq_2[j-1] else mismatch):
+            AlignmentA = seq_1[i-1] + AlignmentA
+            AlignmentB = seq_2[j-1] + AlignmentB
+            i -= 1
+            j -= 1
+        elif Score == ScoreLeft + gap:
+            AlignmentA = seq_1[i-1] + AlignmentA
+            AlignmentB = "-" + AlignmentB
+            i -= 1
+        else:  # Score == ScoreUp + gap
+            AlignmentA = "-" + AlignmentA
+            AlignmentB = seq_2[j-1] + AlignmentB
+            j -= 1
+
+    while i > 0:
+        AlignmentA = seq_1[i-1] + AlignmentA
+        AlignmentB = "-" + AlignmentB
+        i -= 1
+
+    while j > 0:
+        AlignmentA = "-" + AlignmentA
+        AlignmentB = seq_2[j-1] + AlignmentB
+        j -= 1
+
+    return AlignmentA, AlignmentB
+
+
+def insert_substrig(pos, seq, subseq='-'):
+    return seq[:pos] + subseq + seq[pos:]
+
+# Ejecutar alineación estrella y obtener alineación múltiple
+
+
+def star_alignment(sequences):
+    star_pos, best_score, pair_scores, pair_matrices, scores = get_star_pos(
+        sequences)
+
+    alignments = ['' for i in range(len(sequences))]
+    star_alignments = []
+
+    for i in range(len(sequences)):
+        if star_pos == i:
+            continue
+        star_ali, i_ali = align_sequences(
+            sequences[star_pos], sequences[i], pair_matrices[star_pos][i])
+        star_alignments.append(
+            (star_ali, i_ali, i, pair_matrices[star_pos][i][-1][-1]))
+        if star_ali != alignments[star_pos] or len(star_ali) != len(alignments[star_pos]):
+            for k in range(len(alignments[star_pos])):
+                if alignments[star_pos][k] == '-':
+                    prev = 0
+                    while prev < i-1:
+                        if len(alignments[prev]) < len(alignments[star_pos]):
+                            alignments[prev] = insert_substrig(
+                                k, alignments[prev])
+                        prev += 1
+                    i_ali = insert_substrig(k, i_ali)
+                    star_ali = insert_substrig(k, star_ali)
+        alignments[star_pos] = star_ali
+        alignments[i] = i_ali
+
+    return star_pos, best_score, pair_scores, star_alignments, alignments, scores
+
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    alignments = None
+    star_alignments = None
+    pair_scores = None
+    sequences = None
+    best_score = None
+    star_pos = None
+    scores = None
+    if request.method == 'POST':
+        sequences = request.form.get('sequences').strip().split('\n')
+        sequences = [seq.strip() for seq in sequences]
+        star_pos, best_score, pair_scores, star_alignments, alignments, scores = star_alignment(
+            sequences)
+    return render_template('index.html', sequences=sequences, star_pos=star_pos, best_score=best_score, pair_scores=pair_scores, star_alignments=star_alignments, alignments=alignments, scores=scores)
 
 
 #####################################################
