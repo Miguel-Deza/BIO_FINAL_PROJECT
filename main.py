@@ -1,24 +1,25 @@
-import base64
-from flask import Flask, render_template, request, jsonify, url_for
-
-import numpy as np
-import matplotlib.pyplot as plt
-import io
-import base64
-from Bio.SubsMat import MatrixInfo as matlist
-from scipy.cluster.hierarchy import dendrogram
-
-
-# test
-from Bio.Align import substitution_matrices
-from Bio import pairwise2
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-from Bio import SeqIO
-import os
-import networkx as nx
-
 from clustering import hierarchical_clustering, compute_cophenetic_coefficient, draw_dendrograms
+import networkx as nx
+import os
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
+from Bio.Seq import Seq
+from Bio import pairwise2
+from Bio.Align import substitution_matrices
+from scipy.cluster.hierarchy import dendrogram
+from Bio.SubsMat import MatrixInfo as matlist
+import io
+import matplotlib.pyplot as plt
+import numpy as np
+from flask import Flask, render_template, request, jsonify, url_for
+import base64
+import matplotlib
+from BLOSUM62 import BLOSUM62
+matplotlib.use('Agg')
+
+
+
+
 
 app = Flask(__name__)
 
@@ -489,8 +490,7 @@ def plot_structure(sequence, pairs):
 
     G = nx.Graph()
     node_colors = []
-    base_color_map = {'A': '#FF0000', 'U': '#00FF00',
-                      'C': '#0000FF', 'G': '#FFFF00'}
+    base_color_map = {'A': '#FF0000', 'U': '#00FF00', 'C': '#0000FF', 'G': '#FFFF00'}
 
     for idx, base in enumerate(sequence):
         G.add_node(idx + 1, base=base, color=base_color_map[base])
@@ -504,24 +504,20 @@ def plot_structure(sequence, pairs):
 
     pos = nx.kamada_kawai_layout(G)
 
-    nx.draw_networkx_nodes(G, pos, node_color=node_colors,
-                           node_size=200, edgecolors='black', linewidths=1.5)
-    nx.draw_networkx_labels(G, pos, labels={
-                            i: f"{i} ({G.nodes[i]['base']})" for i in G.nodes()}, font_color="black")
+    nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500, edgecolors='black', linewidths=1.5)
+    nx.draw_networkx_labels(G, pos, labels={i: f"{i} ({G.nodes[i]['base']})" for i in G.nodes()}, font_size=10, font_color="black")
 
     edges = G.edges()
     edge_colors = [G[u][v]['color'] for u, v in edges]
     edge_styles = [G[u][v]['style'] for u, v in edges]
-    nx.draw_networkx_edges(G, pos, edgelist=edges,
-                           edge_color=edge_colors, style=edge_styles, width=2)
+    nx.draw_networkx_edges(G, pos, edgelist=edges, edge_color=edge_colors, style=edge_styles, width=2)
 
     # Agregar la leyenda fuera de la imagen
     plt.legend(handles=[
-        plt.Line2D([0], [0], marker='o', color='w',
-                   markerfacecolor=color, markersize=10, label=base)
+        plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=10, label=base)
         for base, color in base_color_map.items()
     ] + [plt.Line2D([0], [0], color="#FF5733", lw=2, linestyle='--', label='Par emparejado')],
-        loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
+    loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
 
     plt.axis('off')
 
@@ -537,8 +533,9 @@ def plot_structure(sequence, pairs):
     return image_base64
 
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+
+@app.route('/secondary', methods=['GET', 'POST'])
+def secondary():
     if request.method == 'POST':
         sequence = request.form['sequence'].upper()
         alpha_dict = {"CG": -1, "GC": -1, "AU": -
@@ -551,10 +548,131 @@ def index():
 
         image_base64 = plot_structure(sequence, paired_positions)
 
-        return render_template('index.html', sequence=sequence, energy_matrix=energy_matrix, min_energy_score=min_energy_score, paired_positions=paired_positions, structures=structures, image_base64=image_base64)
+        return render_template('secondary.html', sequence=sequence, energy_matrix=energy_matrix, min_energy_score=min_energy_score, paired_positions=paired_positions, structures=structures, image_base64=image_base64)
 
+    return render_template('secondary.html')
+
+
+#####################################################
+######### BLOSUM ############
+#####################################################
+
+def algoritmo_alineamiento_local(sequence_1, sequence_2, gap_penalty):
+    len_1 = len(sequence_1)
+    len_2 = len(sequence_2)
+
+    array = np.zeros(shape=(len_1 + 1, len_2 + 1))
+
+    max_score = 0
+    max_i = 0
+    max_j = 0
+
+    for i in range(1, len(sequence_1) + 1):
+        for j in range(1, len(sequence_2) + 1):
+            array[i, j] = max(0,
+                              array[i - 1, j - 1] +
+                              BLOSUM62[sequence_1[i-1]][sequence_2[j-1]],
+                              array[i - 1, j] + gap_penalty,
+                              array[i, j - 1] + gap_penalty)
+            if array[i, j] > max_score:
+                max_score = array[i, j]
+                max_i = i
+                max_j = j
+
+    return array, max_score, max_i, max_j
+
+def algoritmo_alineamiento_global(sequence_1, sequence_2, gap_penalty):
+    len_1 = len(sequence_1)
+    len_2 = len(sequence_2)
+
+    array = np.zeros(shape=(len_1 + 1, len_2 + 1))
+
+    for i in range(1, len_1 + 1):
+        array[i, 0] = gap_penalty * i
+    for j in range(1, len_2 + 1):
+        array[0, j] = gap_penalty * j
+
+    for i in range(1, len_1 + 1):
+        for j in range(1, len_2 + 1):
+            array[i, j] = max(array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]],
+                              array[i - 1, j] + gap_penalty,
+                              array[i, j - 1] + gap_penalty)
+
+    max_score = array[len_1, len_2]
+    return array, max_score, len_1, len_2
+
+def traceback_global(array, sequence_1, sequence_2, gap_penalty):
+    aligned_seq_1 = ""
+    aligned_seq_2 = ""
+    i = len(sequence_1)
+    j = len(sequence_2)
+
+    while i > 0 or j > 0:
+        if i > 0 and j > 0 and array[i, j] == array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]]:
+            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
+            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
+            i -= 1
+            j -= 1
+        elif i > 0 and array[i, j] == array[i - 1, j] + gap_penalty:
+            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
+            aligned_seq_2 = '-' + aligned_seq_2
+            i -= 1
+        else:
+            aligned_seq_1 = '-' + aligned_seq_1
+            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
+            j -= 1
+
+    return aligned_seq_1, aligned_seq_2
+
+def traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty):
+    aligned_seq_1 = ""
+    aligned_seq_2 = ""
+    i = max_i
+    j = max_j
+
+    while array[i, j] != 0:
+        if array[i, j] == array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]]:
+            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
+            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
+            i -= 1
+            j -= 1
+        elif array[i, j] == array[i - 1, j] + gap_penalty:
+            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
+            aligned_seq_2 = '-' + aligned_seq_2
+            i -= 1
+        elif array[i, j] == array[i, j - 1] + gap_penalty:
+            aligned_seq_1 = '-' + aligned_seq_1
+            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
+            j -= 1
+
+    start_i = i + 1  # Convert to 1-based index
+    start_j = j + 1  # Convert to 1-based index
+
+    return aligned_seq_1, aligned_seq_2, start_i, start_j
+
+@app.route('/')
+def index():
     return render_template('index.html')
 
+@app.route('/align', methods=['POST'])
+def align():
+    sequence_1 = request.form['sequence1']
+    sequence_2 = request.form['sequence2']
+    gap_penalty = int(request.form['gap_penalty'])
+    alignment_type = request.form['alignment_type']
+
+    if alignment_type == 'local':
+        array, max_score, max_i, max_j = algoritmo_alineamiento_local(sequence_1, sequence_2, gap_penalty)
+        aligned_seq_1, aligned_seq_2, start_i, start_j = traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty)
+        return render_template('index.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
+                               aligned_seq_1=aligned_seq_1, aligned_seq_2=aligned_seq_2, max_score=max_score, start_i=start_i, start_j=start_j,
+                               score_matrix=array.tolist())
+    else:
+        array, max_score, _, _ = algoritmo_alineamiento_global(sequence_1, sequence_2, gap_penalty)
+        aligned_seq_1, aligned_seq_2 = traceback_global(array, sequence_1, sequence_2, gap_penalty)
+        return render_template('index.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
+                               aligned_seq_1=aligned_seq_1, aligned_seq_2=aligned_seq_2, max_score=max_score,
+                               score_matrix=array.tolist())
 
 #####################################################
 ######### Final ############

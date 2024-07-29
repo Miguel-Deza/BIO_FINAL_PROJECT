@@ -1,99 +1,118 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RNA Secondary Structure Prediction</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Sequence Alignment</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            padding: 20px;
+        .highlight {
+            background-color: #ffff66; /* Light yellow for max score */
         }
-        .container {
-            margin-top: 50px;
+        .path {
+            background-color: #66b2ff; /* Light blue for path */
         }
-        .result {
-            margin-top: 30px;
-            animation: fadeIn 1s;
+        .animate__animated {
+            animation-duration: 2s;
+            animation-fill-mode: both;
+        }
+        .animate__fadeIn {
+            animation-name: fadeIn;
         }
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
-        .matrix-table {
-            overflow-x: auto;
+        .A {
+            background-color: #ff9999; /* Light red for A */
         }
-        .matrix-table table {
-            width: 100%;
+        .C {
+            background-color: #99ff99; /* Light green for C */
         }
-        .pair-list li {
-            list-style-type: none;
-            background: #007bff;
-            color: white;
-            padding: 5px 10px;
-            margin: 5px;
-            border-radius: 5px;
-            display: inline-block;
+        .G {
+            background-color: #9999ff; /* Light blue for G */
+        }
+        .T {
+            background-color: #ffcc99; /* Light orange for T */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center mb-4">RNA Secondary Structure Prediction</h1>
-        <div class="card shadow p-4">
-            <form method="POST">
-                <div class="form-group">
-                    <label for="sequence">Enter RNA Sequence:</label>
-                    <input type="text" class="form-control" id="sequence" name="sequence" placeholder="Enter RNA sequence" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Predict</button>
-            </form>
+    <div class="container mt-5">
+        <h1 class="text-center">Sequence Alignment</h1>
+        <form action="/align" method="post" class="mt-4">
+            <div class="form-group">
+                <label for="sequence1">Sequence 1:</label>
+                <input type="text" class="form-control" id="sequence1" name="sequence1" required>
+            </div>
+            <div class="form-group">
+                <label for="sequence2">Sequence 2:</label>
+                <input type="text" class="form-control" id="sequence2" name="sequence2" required>
+            </div>
+            <div class="form-group">
+                <label for="gap_penalty">Gap Penalty:</label>
+                <input type="number" class="form-control" id="gap_penalty" name="gap_penalty" required>
+            </div>
+            <div class="form-group">
+                <label for="alignment_type">Alignment Type:</label>
+                <select class="form-control" id="alignment_type" name="alignment_type" required>
+                    <option value="local">Local</option>
+                    <option value="global">Global</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Align</button>
+        </form>
 
-            {% if sequence %}
-            <div class="result card mt-5 p-4">
-                <h2 class="text-center">Results for Sequence: {{ sequence }}</h2>
-                <p class="text-center"><strong>Minimum Energy Score:</strong> {{ min_energy_score }}</p>
+        {% if aligned_seq_1 and aligned_seq_2 %}
+            <div class="mt-5 animate__animated animate__fadeIn">
+                <h2>Results</h2>
+                <p><strong>Alignment Type:</strong> {{ alignment_type }}</p>
+                <p><strong>Sequence 1:</strong> <span class="{{ sequence_1 | slice(0, 1) }}">{{ sequence_1 }}</span></p>
+                <p><strong>Sequence 2:</strong> <span class="{{ sequence_2 | slice(0, 1) }}">{{ sequence_2 }}</span></p>
+                <p><strong>Aligned Sequence 1:</strong> <span class="{{ aligned_seq_1 | slice(0, 1) }}">{{ aligned_seq_1 }}</span></p>
+                <p><strong>Aligned Sequence 2:</strong> <span class="{{ aligned_seq_2 | slice(0, 1) }}">{{ aligned_seq_2 }}</span></p>
+                <p><strong>Max Score:</strong> <span class="badge badge-success">{{ max_score }}</span></p>
+                {% if alignment_type == 'local' %}
+                    <p><strong>Start Position in Sequence 1:</strong> <span class="badge badge-info">{{ start_i }}</span></p>
+                    <p><strong>Start Position in Sequence 2:</strong> <span class="badge badge-info">{{ start_j }}</span></p>
+                {% endif %}
 
-                <h3>Energy Matrix:</h3>
-                <div class="matrix-table">
-                    <table class="table table-bordered table-sm">
-                        {% for row in energy_matrix %}
-                        <tr>
-                            {% for cell in row %}
-                            <td>{{ cell }}</td>
+                <h2>Score Matrix</h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                {% for j in range(1, score_matrix[0]|length) %}
+                                    <th class="{{ sequence_2[j-1] }}">{{ sequence_2[j-1] }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in range(1, score_matrix|length) %}
+                                <tr>
+                                    <th class="{{ sequence_1[i-1] }}">{{ sequence_1[i-1] }}</th>
+                                    {% for j in range(1, score_matrix[0]|length) %}
+                                        <td class="
+                                            {% if (i, j) in path %} path {% endif %}
+                                            {% if score_matrix[i][j] == max_score %} highlight {% endif %}
+                                        ">{{ score_matrix[i][j] }}</td>
+                                    {% endfor %}
+                                </tr>
                             {% endfor %}
-                        </tr>
-                        {% endfor %}
+                        </tbody>
                     </table>
                 </div>
-
-                <h3>Paired Positions:</h3>
-                <ul class="pair-list">
-                    {% for pair in paired_positions %}
-                    <li>{{ pair[0] }} - {{ pair[1] }}</li>
-                    {% endfor %}
-                </ul>
-
-                <!-- <h3>Structures:</h3>
-                <ul class="list-group">
-                    {% for structure in structures %}
-                    <li class="list-group-item">{{ structure }}</li>
-                    {% endfor %}
-                </ul> -->
-
-                <h3 class="mt-4">Structure Diagram:</h3>
-                <div class="text-center">
-                    <img src="data:image/png;base64,{{ image_base64 }}" alt="RNA Secondary Structure" class="img-fluid">
-                </div>
             </div>
-            {% endif %}
-        </div>
+        {% endif %}
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
