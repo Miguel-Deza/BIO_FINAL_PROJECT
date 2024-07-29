@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNA Secondary Structure Prediction</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .result {
+            margin-top: 30px;
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .matrix-table {
+            overflow-x: auto;
+        }
+        .matrix-table table {
+            width: 100%;
+        }
+        .pair-list li {
+            list-style-type: none;
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">RNA Secondary Structure Prediction</h1>
+        <div class="card shadow p-4">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="sequence">Enter RNA Sequence:</label>
+                    <input type="text" class="form-control" id="sequence" name="sequence" placeholder="Enter RNA sequence" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Predict</button>
+            </form>
+
+            {% if sequence %}
+            <div class="result card mt-5 p-4">
+                <h2 class="text-center">Results for Sequence: {{ sequence }}</h2>
+                <p class="text-center"><strong>Minimum Energy Score:</strong> {{ min_energy_score }}</p>
+
+                <h3>Energy Matrix:</h3>
+                <div class="matrix-table">
+                    <table class="table table-bordered table-sm">
+                        {% for row in energy_matrix %}
+                        <tr>
+                            {% for cell in row %}
+                            <td>{{ cell }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+
+                <h3>Paired Positions:</h3>
+                <ul class="pair-list">
+                    {% for pair in paired_positions %}
+                    <li>{{ pair[0] }} - {{ pair[1] }}</li>
+                    {% endfor %}
+                </ul>
+
+                <!-- <h3>Structures:</h3>
+                <ul class="list-group">
+                    {% for structure in structures %}
+                    <li class="list-group-item">{{ structure }}</li>
+                    {% endfor %}
+                </ul> -->
+
+                <h3 class="mt-4">Structure Diagram:</h3>
+                <div class="text-center">
+                    <img src="data:image/png;base64,{{ image_base64 }}" alt="RNA Secondary Structure" class="img-fluid">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
