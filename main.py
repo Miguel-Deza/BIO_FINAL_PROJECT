@@ -14,12 +14,10 @@ import numpy as np
 from flask import Flask, render_template, request, jsonify, url_for
 import base64
 import matplotlib
+import math
+import itertools
 from BLOSUM62 import BLOSUM62
 matplotlib.use('Agg')
-
-
-
-
 
 app = Flask(__name__)
 
@@ -141,31 +139,6 @@ def nw():
     return render_template('neddleman-wunch/index.html')
 
 
-#####################################################
-######### Alineamiento proteínas (usar Blosum o Pam) - FASTA ############
-#####################################################
-
-blosum62 = substitution_matrices.load("BLOSUM62")
-
-
-def align_sequences(seq1, seq2):
-    alignments = pairwise2.align.globalds(seq1, seq2, blosum62, -10, -0.5)
-    best_alignment = alignments[0]
-    return best_alignment
-
-
-@app.route('/blosum', methods=['GET', 'POST'])
-def blosum():
-    if request.method == 'POST':
-        seq1 = request.form['sequence1']
-        seq2 = request.form['sequence2']
-        alignment = align_sequences(seq1, seq2)
-        return render_template('blosum.html', alignment=alignment, seq1=seq1, seq2=seq2)
-    return render_template('blosum.html')
-
-#####################################################
-######### Alineamiento proteínas (usar Blosum o Pam) - FASTA ############
-#####################################################
 
 #####################################################
 ######### START Alignment ############
@@ -322,14 +295,400 @@ def estrella():
             sequences)
     return render_template('estrella.html', sequences=sequences, star_pos=star_pos, best_score=best_score, pair_scores=pair_scores, star_alignments=star_alignments, alignments=alignments, scores=scores)
 
+
+
 #####################################################
-######### BLOSUM ############
+######### NJ ############
 #####################################################
+def S(A):
+    d = np.shape(A)[1]
+    l = []
+    for j in range(d):
+        l.append((np.sum(A[j, :j]) + np.sum(A[j+1:, j]))/(d - 2))
+    return (l)
+
+
+def M(A):
+    a = 0
+    b = 0
+    c = 0
+    d = np.shape(A)[1]
+    for i in range(2, d + 1):
+        for j in range(1, i):
+            m = A[i - 1][j - 1] - S(A)[i - 1] - S(A)[j - 1]
+            if m < a:
+                a = m
+                b = i
+                c = j
+    lbu1 = (A[b - 1][c - 1] + S(A)[b - 1] - S(A)[c - 1])/2.0
+    lcu1 = (A[b - 1][c - 1] + S(A)[c - 1] - S(A)[b - 1])/2.0
+    return ([a, [b, c], [lbu1, lcu1]])
+
+
+def NewCR(A):
+    d = np.shape(A)[1]
+    cf = min(M(A)[1])
+    cf1 = max(M(A)[1])
+    c = [0 for i in range(d)]
+    r = [0 for i in range(d-1)]
+
+    if cf == 1:
+        for i in range(cf + 1, d + 1):
+            c[i - 1] = (A[cf - 1, i - 1] + A[i - 1, cf - 1] + A[cf1 - 1,
+                        i - 1] + A[i - 1, cf1 - 1] - A[cf1 - 1, cf - 1])/2.0
+    else:
+        for i in range(1, cf):
+            r[i - 1] = (A[cf - 1, i - 1] + A[i - 1, cf - 1] + A[cf1 - 1,
+                        i - 1] + A[i - 1, cf1 - 1] - A[cf1 - 1, cf - 1])/2.0
+        for i in range(cf + 1, d+1):
+            c[i - 1] = (A[cf - 1, i - 1] + A[i - 1, cf - 1] + A[cf1 - 1,
+                        i - 1] + A[i - 1, cf1 - 1] - A[cf1 - 1, cf - 1])/2.0
+    del c[cf1 - 1]
+    return ([r, c])
+
+
+def NewM(A):
+    A1 = A.copy()
+    cf1 = max(M(A)[1])
+    cf = min(M(A)[1])
+    d = np.shape(A)[1]
+    A1 = np.delete(A1, cf1 - 1, 1)
+    A1 = np.delete(A1, cf1 - 1, 0)
+
+    A1[cf - 1, :d - 1] = NewCR(A)[0]
+    A1[:d - 1, cf - 1] = NewCR(A)[1]
+    return (A1)
+
+
+def NF(A, CH):
+    ch = CH.copy()
+    a = A.copy()
+    d = np.shape(a)[1]
+    while (d > 2):
+        w1 = M(a)[1]
+        w2 = M(a)[2]
+        cf = min(w1)
+        cf1 = max(w1)
+        y = []
+        if type(ch[w1[0] - 1]) == str:
+            y.append([ch[w1[0] - 1], w2[0]])
+        else:
+            y.append(ch[w1[0] - 1])
+        if type(ch[w1[1] - 1]) == str:
+            y.append([ch[w1[1] - 1], w2[1]])
+        else:
+            y.append(ch[w1[1] - 1])
+        ch[cf - 1] = y
+        del ch[cf1 - 1]
+        a = NewM(a)
+        d = np.shape(a)[1]
+
+    if type(ch[0]) == str:
+        ch[0] = [ch[0], a[1, 0]]
+    if type(ch[1]) == str:
+        ch[1] = [ch[1], a[1, 0]]
+    return (ch)
+
+
+def newX(deg, x, y, x0, y0):
+    return ((x - x0) * math.cos(deg) + (y - y0) * math.sin(deg)) + x0
+
+
+def newY(deg, x, y, x0, y0):
+    return (-(x - x0) * math.sin(deg) + (y - y0) * math.cos(deg)) + y0
+
+
+def BR(p1, p2, L, deg):
+    if deg == 90:
+        if p2[1] != p1[1]:
+            m = -(p2[0] - p1[0]) / (p2[1] - p1[1])
+        else:
+            m = 100
+        m1 = m
+        m2 = m
+    else:
+        x1 = newX(deg, p1[0], p1[1], p2[0], p2[1])
+        y1 = newY(deg, p1[0], p1[1], p2[0], p2[1])
+        x2 = newX(-deg, p1[0], p1[1], p2[0], p2[1])
+        y2 = newY(-deg, p1[0], p1[1], p2[0], p2[1])
+        p11 = [x1, y1]
+        p12 = [x2, y2]
+        if p2 != p1:
+            m1 = -(p2[0] - p11[0]) / (p2[1] - p11[1])
+            m2 = -(p2[0] - p12[0]) / (p2[1] - p12[1])
+        else:
+            m1 = 100
+            m2 = 100
+    k = math.sqrt(L*L/(1 + m1*m1))
+    a = k + p2[0]
+    b = m1 * k + p2[1]
+    c = -k + p2[0]
+    d = -m1 * k + p2[1]
+    k2 = math.sqrt(L*L/(1 + m2*m2))
+    a2 = k2 + p2[0]
+    b2 = m2 * k2 + p2[1]
+    c2 = -k2 + p2[0]
+    d2 = -m2 * k2 + p2[1]
+    if deg == 90:
+        return [p2, [a, b]], [p2, [c, d]]
+    elif (p1[0]-p2[0])**2 > (p1[1]-p2[1])**2 and p2[0] < p1[0]:
+        return [[p2, [c, d]], [p2, [c2, d2]]]
+    elif (p1[0]-p2[0])**2 > (p1[1]-p2[1])**2 and p2[0] > p1[0]:
+        return [[p2, [a, b]], [p2, [a2, b2]]]
+    elif (p1[0]-p2[0])**2 < (p1[1]-p2[1])**2 and p2[1] < p1[1]:
+        return [[p2, [a, b]], [p2, [c2, d2]]]
+    elif (p1[0]-p2[0])**2 < (p1[1]-p2[1])**2 and p2[1] > p1[1]:
+        return [[p2, [c, d]], [p2, [a2, b2]]]
+
+
+def Bplt(a, b):
+    return plt.plot([a[0][0], a[1][0], b[0][0][0], b[0][1][0], b[1][0][0], b[1][1][0]],
+                    [a[0][1], a[1][1], b[0][0][1], b[0][1][1], b[1][0][1], b[1][1][1]]), plt.axis('off')
+
+
+p = []
+lbl = []
+
+
+def Points(NWF, v0, P, LBL):
+    global lbl, nwf, p
+    p = P
+    lbl = LBL
+    nwf = NWF
+    lst = []
+    lst.append(v0)
+    if type(nwf[0][0]) == str and type(nwf[1][0]) == str:
+        lst.append(BR(v0[0], v0[1], nwf[0][1], 45)[0])
+        vv = BR(v0[0], v0[1], nwf[0][1], 45)[0]
+        vv.append([nwf[0][0], nwf[0][1]])
+        lbl.append(vv)
+        lst.append(BR(v0[0], v0[1], nwf[1][1], 45)[1])
+        vv = BR(v0[0], v0[1], nwf[1][1], 45)[1]
+        vv.append([nwf[1][0], nwf[1][1]])
+        lbl.append(vv)
+        del lst[0]
+        p.extend(lst)
+        return ([p, lbl])
+    elif type(nwf[0][0]) == str:
+        lst.append(BR(v0[0], v0[1], nwf[0][1], 45)[0])
+        vv = BR(v0[0], v0[1], nwf[0][1], 45)[0]
+        vv.append([nwf[0][0], nwf[0][1]])
+        lbl.append(vv)
+        lst.append(BR(v0[0], v0[1], 6, 90)[1])
+        del lst[0]
+        p.extend(lst)
+        del nwf[0]
+        n = len(nwf)
+        while (n < 2):
+            nwf = nwf[0]
+            n = len(nwf)
+        return (Points(nwf, lst[-1], p, lbl))
+    elif type(nwf[1][0]) == str:
+        lst.append(BR(v0[0], v0[1], nwf[1][1], 45)[0])
+        vv = BR(v0[0], v0[1], nwf[1][1], 45)[0]
+        vv.append([nwf[1][0], nwf[1][1]])
+        lbl.append(vv)
+        lst.append(BR(v0[0], v0[1], 6, 90)[1])
+        del lst[0]
+        p.extend(lst)
+        del nwf[1]
+        n = len(nwf)
+        while (n < 2):
+            nwf = nwf[0]
+            n = len(nwf)
+        return (Points(nwf, lst[-1], p, lbl))
+    else:
+        lst.append(BR(v0[0], v0[1], 6, 90)[0])
+        lst.append(BR(v0[0], v0[1], 6, 90)[1])
+        del lst[0]
+        p.extend(lst)
+        ss = nwf[1]
+        Points(nwf[0], BR(v0[0], v0[1], 6, 90)[0], p, lbl)
+        return (Points(ss, BR(v0[0], v0[1], 6, 90)[1], p, lbl))
+
+
+def draw(p):
+    for i in p[0]:
+        x = [i[0][0], i[1][0]]
+        y = [i[0][1], i[1][1]]
+        plt.plot(x, y)
+        plt.scatter(i[1][0], i[1][1])
+    for i in p[1]:
+        x = (i[0][0]+i[1][0])/2.0
+        y = (i[0][1]+i[1][1])/2.0
+        plt.text(i[1][0], i[1][1], '%s' % i[2][0])
+        plt.text(x+.1, y+.1, '%d' % (i[2][1]))
+    plt.axis('off')
+
+
+@app.route('/nj', methods=['GET', 'POST'])
+def nj():
+    if request.method == 'POST':
+        labels = request.form['labels'].split(',')
+        data = request.form['data'].strip().split('\n')
+        data = [list(map(int, row.split())) for row in data]
+        A = np.array(data)
+        U = labels
+
+        ex_points = Points(NWF=NF(A, U), v0=[[0, 1], [0, 0]], P=[], LBL=[])
+        fig, ax = plt.subplots()
+        draw(ex_points)
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plot_url = base64.b64encode(img.getvalue()).decode()
+        plt.close(fig)
+        return render_template('nj.html', plot_url=plot_url)
+    return render_template('nj.html')
 
 #####################################################
 ######### ARBOL ENRAIZADO ############
 #####################################################
 
+
+class Node(object):
+    def __init__(self, dist_function, index=None, left=None, right=None):
+        self.dist_function = dist_function
+        self.index = index
+        self.left = left
+        self.right = right
+        self.nn = None
+        self.dist = None
+        self.size = 1
+
+    def __str__(self):
+        if self.index is not None:
+            return f"Taxon {self.index}"
+        else:
+            left_str = str(self.left)
+            right_str = str(self.right)
+            return f"({left_str}, {right_str}) [{self.dist}]"
+
+    def __iter__(self):
+        if self.index is not None:
+            yield self.index
+        else:
+            if self.left is not None:
+                for item in self.left:
+                    yield item
+            if self.right is not None:
+                for item in self.right:
+                    yield item
+
+    def __len__(self):
+        return sum(1 for _ in self.__iter__())
+
+    def get_dist(self, node2):
+        res_pairs = itertools.product(self, node2)
+        dist = sum(self.dist_function(i, j) for i, j in res_pairs)
+        return dist / (len(self) * len(node2))
+
+    def update_distances(self, clusters):
+        self.nn = None
+        self.dist_to_NN = None
+        for node in clusters:
+            if node is self:
+                continue
+            dist_to_node = self.get_dist(node)
+            if self.dist_to_NN is None or dist_to_node < self.dist_to_NN:
+                self.dist_to_NN = dist_to_node
+                self.nn = node
+        return self.nn
+
+    def calculate_distance(self):
+        if self.left is not None and self.right is not None:
+            self.dist = (self.left.get_dist(self.right)) / 2
+            self.size = self.left.size + self.right.size
+
+class UPGMA(object):
+    def __init__(self, labels, dist_matrix):
+        self.labels = labels
+        self.dist_matrix = dist_matrix
+        self.nodes = [Node(self.distance, index=i) for i in range(len(labels))]
+        self.build_tree(self.nodes)
+
+    def distance(self, i, j):
+        return self.dist_matrix[i, j]
+
+    def build_tree(self, nodes):
+        while len(nodes) > 1:
+            for node in nodes:
+                node.update_distances(nodes)
+
+            c1, c2 = self._get_closest_pair(nodes)
+            nodes.remove(c1)
+            nodes.remove(c2)
+            new_node = self._create_OTU(c1, c2)
+            nodes.append(new_node)
+
+        self.tree = nodes[0]
+
+    def _create_OTU(self, c1, c2):
+        new_node = Node(self.distance, left=c1, right=c2)
+        new_node.calculate_distance()
+        return new_node
+
+    def _get_closest_pair(self, nodes):
+        min_dist = None
+        c1 = c2 = None
+        for node in nodes:
+            if node.dist_to_NN is not None:
+                if min_dist is None or node.dist_to_NN < min_dist:
+                    min_dist = node.dist_to_NN
+                    c1 = node
+                    c2 = node.nn
+        return c1, c2
+
+    def get_tree_structure(self):
+        def helper(node):
+            if node.index is not None:
+                return self.labels[node.index]
+            return (helper(node.left), helper(node.right), node.dist)
+        return helper(self.tree)
+
+    def draw_tree(self):
+        def add_edges(node, G, pos=None, x=0, y=0, layer=1):
+            if pos is None:
+                pos = {}
+            pos[node] = (x, y)
+            if node.left is not None:
+                G.add_edge(node, node.left, weight=node.dist)
+                l = x - 1 / (2 ** layer)
+                pos = add_edges(node.left, G, pos=pos, x=l, y=y - 1, layer=layer + 1)
+            if node.right is not None:
+                G.add_edge(node, node.right, weight=node.dist)
+                r = x + 1 / (2 ** layer)
+                pos = add_edges(node.right, G, pos=pos, x=r, y=y - 1, layer=layer + 1)
+            return pos
+
+        G = nx.DiGraph()
+        pos = add_edges(self.tree, G)
+        labels = {node: self.labels[node.index] if node.index is not None else '' for node in G.nodes()}
+
+        plt.figure(figsize=(12, 8))
+        nx.draw(G, pos, with_labels=True, labels=labels, node_size=2000, node_color='lightblue', font_size=10, font_weight='bold', edge_color='gray')
+        edge_labels = nx.get_edge_attributes(G, 'weight')
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=9)
+        plt.title('UPGMA Tree')
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        img = base64.b64encode(buf.read()).decode('utf-8')
+        buf.close()
+        return img
+
+@app.route('/upgma', methods=['GET', 'POST'])
+def upgma():
+    if request.method == 'POST':
+        labels = request.form['labels'].split(',')
+        dist_matrix_str = request.form['dist_matrix'].strip().split('\n')
+        dist_matrix = np.array([list(map(float, row.split())) for row in dist_matrix_str])
+        upgma_tree = UPGMA(labels, dist_matrix)
+        tree_structure = upgma_tree.get_tree_structure()
+        tree_image = upgma_tree.draw_tree()
+        return render_template('upgma.html', tree_structure=tree_structure, tree_image=tree_image)
+    return render_template('upgma.html')
 
 #####################################################
 ######### CLUSTERIZACIÓN ############
@@ -649,12 +1008,13 @@ def traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty):
     start_j = j + 1  # Convert to 1-based index
 
     return aligned_seq_1, aligned_seq_2, start_i, start_j
+#################################
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+@app.route('/blosum')
+def blosum():
+    return render_template('blosum.html')
 
-@app.route('/align', methods=['POST'])
+@app.route('/blosum/align', methods=['POST'])
 def align():
     sequence_1 = request.form['sequence1']
     sequence_2 = request.form['sequence2']
@@ -664,15 +1024,16 @@ def align():
     if alignment_type == 'local':
         array, max_score, max_i, max_j = algoritmo_alineamiento_local(sequence_1, sequence_2, gap_penalty)
         aligned_seq_1, aligned_seq_2, start_i, start_j = traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty)
-        return render_template('index.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
+        return render_template('blosum.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
                                aligned_seq_1=aligned_seq_1, aligned_seq_2=aligned_seq_2, max_score=max_score, start_i=start_i, start_j=start_j,
                                score_matrix=array.tolist())
     else:
         array, max_score, _, _ = algoritmo_alineamiento_global(sequence_1, sequence_2, gap_penalty)
         aligned_seq_1, aligned_seq_2 = traceback_global(array, sequence_1, sequence_2, gap_penalty)
-        return render_template('index.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
+        return render_template('blosum.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
                                aligned_seq_1=aligned_seq_1, aligned_seq_2=aligned_seq_2, max_score=max_score,
                                score_matrix=array.tolist())
+
 
 #####################################################
 ######### Final ############
