@@ -133,7 +133,6 @@ def dotmatrix():
 ######### Alineamiento global - Neddleman-Wunch ############
 #####################################################
 
-
 @app.route('/nw')
 def nw():
     return render_template('neddleman-wunch/index.html')
@@ -142,6 +141,131 @@ def nw():
 ######### Alineamiento Local ############
 #####################################################
 
+@app.route('/sw')
+def sw():
+    return render_template('smith-waterman/index.html')
+
+#####################################################
+######### BLOSUM ############
+#####################################################
+
+def algoritmo_alineamiento_local(sequence_1, sequence_2, gap_penalty):
+    len_1 = len(sequence_1)
+    len_2 = len(sequence_2)
+
+    array = np.zeros(shape=(len_1 + 1, len_2 + 1))
+
+    max_score = 0
+    max_i = 0
+    max_j = 0
+
+    for i in range(1, len(sequence_1) + 1):
+        for j in range(1, len(sequence_2) + 1):
+            array[i, j] = max(0,
+                              array[i - 1, j - 1] +
+                              BLOSUM62[sequence_1[i-1]][sequence_2[j-1]],
+                              array[i - 1, j] + gap_penalty,
+                              array[i, j - 1] + gap_penalty)
+            if array[i, j] > max_score:
+                max_score = array[i, j]
+                max_i = i
+                max_j = j
+
+    return array, max_score, max_i, max_j
+
+def algoritmo_alineamiento_global(sequence_1, sequence_2, gap_penalty):
+    len_1 = len(sequence_1)
+    len_2 = len(sequence_2)
+
+    array = np.zeros(shape=(len_1 + 1, len_2 + 1))
+
+    for i in range(1, len_1 + 1):
+        array[i, 0] = gap_penalty * i
+    for j in range(1, len_2 + 1):
+        array[0, j] = gap_penalty * j
+
+    for i in range(1, len_1 + 1):
+        for j in range(1, len_2 + 1):
+            array[i, j] = max(array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]],
+                              array[i - 1, j] + gap_penalty,
+                              array[i, j - 1] + gap_penalty)
+
+    max_score = array[len_1, len_2]
+    return array, max_score, len_1, len_2
+
+def traceback_global(array, sequence_1, sequence_2, gap_penalty):
+    aligned_seq_1 = ""
+    aligned_seq_2 = ""
+    i = len(sequence_1)
+    j = len(sequence_2)
+
+    while i > 0 or j > 0:
+        if i > 0 and j > 0 and array[i, j] == array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]]:
+            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
+            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
+            i -= 1
+            j -= 1
+        elif i > 0 and array[i, j] == array[i - 1, j] + gap_penalty:
+            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
+            aligned_seq_2 = '-' + aligned_seq_2
+            i -= 1
+        else:
+            aligned_seq_1 = '-' + aligned_seq_1
+            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
+            j -= 1
+
+    return aligned_seq_1, aligned_seq_2
+
+def traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty):
+    aligned_seq_1 = ""
+    aligned_seq_2 = ""
+    i = max_i
+    j = max_j
+
+    while array[i, j] != 0:
+        if array[i, j] == array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]]:
+            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
+            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
+            i -= 1
+            j -= 1
+        elif array[i, j] == array[i - 1, j] + gap_penalty:
+            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
+            aligned_seq_2 = '-' + aligned_seq_2
+            i -= 1
+        elif array[i, j] == array[i, j - 1] + gap_penalty:
+            aligned_seq_1 = '-' + aligned_seq_1
+            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
+            j -= 1
+
+    start_i = i + 1  # Convert to 1-based index
+    start_j = j + 1  # Convert to 1-based index
+
+    return aligned_seq_1, aligned_seq_2, start_i, start_j
+#################################
+
+@app.route('/blosum')
+def blosum():
+    return render_template('blosum.html')
+
+@app.route('/blosum/align', methods=['POST'])
+def align():
+    sequence_1 = request.form['sequence1']
+    sequence_2 = request.form['sequence2']
+    gap_penalty = int(request.form['gap_penalty'])
+    alignment_type = request.form['alignment_type']
+
+    if alignment_type == 'local':
+        array, max_score, max_i, max_j = algoritmo_alineamiento_local(sequence_1, sequence_2, gap_penalty)
+        aligned_seq_1, aligned_seq_2, start_i, start_j = traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty)
+        return render_template('blosum.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
+                               aligned_seq_1=aligned_seq_1, aligned_seq_2=aligned_seq_2, max_score=max_score, start_i=start_i, start_j=start_j,
+                               score_matrix=array.tolist())
+    else:
+        array, max_score, _, _ = algoritmo_alineamiento_global(sequence_1, sequence_2, gap_penalty)
+        aligned_seq_1, aligned_seq_2 = traceback_global(array, sequence_1, sequence_2, gap_penalty)
+        return render_template('blosum.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
+                               aligned_seq_1=aligned_seq_1, aligned_seq_2=aligned_seq_2, max_score=max_score,
+                               score_matrix=array.tolist())
 
 
 #####################################################
@@ -546,6 +670,69 @@ def nj():
     return render_template('nj.html')
 
 #####################################################
+######### CLUSTERIZACIÓN ############
+#####################################################
+@app.route('/clusterizacion')
+def clusterizacion():
+    return render_template('form.html')
+
+
+@app.route('/results', methods=['POST'])
+def results():
+    data = request.form['matrix']
+    method = request.form['method']
+
+    # Convert the input string into a matrix
+    distance_matrix = np.array(
+        [[float(num) for num in line.split()] for line in data.strip().split('\n')])
+
+    if method == 'Compare':
+        # Compare all methods
+        methods = ['Minimum', 'Maximum', 'Average']
+        results = {}
+        clusters_list = []
+        distances_list = []
+
+        for method in methods:
+            clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(
+                distance_matrix, method)
+            ccc = compute_cophenetic_coefficient(
+                distance_matrix, cophenetic_matrix)
+            results[method] = (clustering_result, matrices,
+                               min_distances, cophenetic_matrix, ccc)
+            clusters_list.append(clustering_result)
+            distances_list.append(min_distances)
+
+        best_method = max(results, key=lambda m: results[m][4])
+        best_ccc = results[best_method][4]
+
+        # Draw the dendrogram
+        draw_dendrograms(clusters_list, distances_list, methods,
+                         save_filename='static/images/combined_dendrograms.png')
+
+        return render_template('compare_results.html',
+                               results=results,
+                               best_method=best_method,
+                               best_ccc=best_ccc)
+    else:
+        # Perform clustering for the selected method
+        clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(
+            distance_matrix, method)
+        ccc = compute_cophenetic_coefficient(
+            distance_matrix, cophenetic_matrix)
+
+        # Draw the dendrogram
+        draw_dendrograms([clustering_result], [min_distances], [
+                         method], save_filename='static/images/combined_dendrograms.png')
+
+        return render_template('results.html',
+                               clusters=clustering_result,
+                               min_distances=min_distances,
+                               cophenetic_matrix=cophenetic_matrix,
+                               ccc=ccc,
+                               method=method)
+
+#####################################################
 ######### ARBOL ENRAIZADO ############
 #####################################################
 
@@ -694,68 +881,7 @@ def upgma():
         return render_template('upgma.html', tree_structure=tree_structure, tree_image=tree_image)
     return render_template('upgma.html')
 
-#####################################################
-######### CLUSTERIZACIÓN ############
-#####################################################
-@app.route('/clusterizacion')
-def clusterizacion():
-    return render_template('form.html')
 
-
-@app.route('/results', methods=['POST'])
-def results():
-    data = request.form['matrix']
-    method = request.form['method']
-
-    # Convert the input string into a matrix
-    distance_matrix = np.array(
-        [[float(num) for num in line.split()] for line in data.strip().split('\n')])
-
-    if method == 'Compare':
-        # Compare all methods
-        methods = ['Minimum', 'Maximum', 'Average']
-        results = {}
-        clusters_list = []
-        distances_list = []
-
-        for method in methods:
-            clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(
-                distance_matrix, method)
-            ccc = compute_cophenetic_coefficient(
-                distance_matrix, cophenetic_matrix)
-            results[method] = (clustering_result, matrices,
-                               min_distances, cophenetic_matrix, ccc)
-            clusters_list.append(clustering_result)
-            distances_list.append(min_distances)
-
-        best_method = max(results, key=lambda m: results[m][4])
-        best_ccc = results[best_method][4]
-
-        # Draw the dendrogram
-        draw_dendrograms(clusters_list, distances_list, methods,
-                         save_filename='static/images/combined_dendrograms.png')
-
-        return render_template('compare_results.html',
-                               results=results,
-                               best_method=best_method,
-                               best_ccc=best_ccc)
-    else:
-        # Perform clustering for the selected method
-        clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(
-            distance_matrix, method)
-        ccc = compute_cophenetic_coefficient(
-            distance_matrix, cophenetic_matrix)
-
-        # Draw the dendrogram
-        draw_dendrograms([clustering_result], [min_distances], [
-                         method], save_filename='static/images/combined_dendrograms.png')
-
-        return render_template('results.html',
-                               clusters=clustering_result,
-                               min_distances=min_distances,
-                               cophenetic_matrix=cophenetic_matrix,
-                               ccc=ccc,
-                               method=method)
 
 
 #####################################################
@@ -916,127 +1042,6 @@ def secondary():
     return render_template('secondary.html')
 
 
-#####################################################
-######### BLOSUM ############
-#####################################################
-
-def algoritmo_alineamiento_local(sequence_1, sequence_2, gap_penalty):
-    len_1 = len(sequence_1)
-    len_2 = len(sequence_2)
-
-    array = np.zeros(shape=(len_1 + 1, len_2 + 1))
-
-    max_score = 0
-    max_i = 0
-    max_j = 0
-
-    for i in range(1, len(sequence_1) + 1):
-        for j in range(1, len(sequence_2) + 1):
-            array[i, j] = max(0,
-                              array[i - 1, j - 1] +
-                              BLOSUM62[sequence_1[i-1]][sequence_2[j-1]],
-                              array[i - 1, j] + gap_penalty,
-                              array[i, j - 1] + gap_penalty)
-            if array[i, j] > max_score:
-                max_score = array[i, j]
-                max_i = i
-                max_j = j
-
-    return array, max_score, max_i, max_j
-
-def algoritmo_alineamiento_global(sequence_1, sequence_2, gap_penalty):
-    len_1 = len(sequence_1)
-    len_2 = len(sequence_2)
-
-    array = np.zeros(shape=(len_1 + 1, len_2 + 1))
-
-    for i in range(1, len_1 + 1):
-        array[i, 0] = gap_penalty * i
-    for j in range(1, len_2 + 1):
-        array[0, j] = gap_penalty * j
-
-    for i in range(1, len_1 + 1):
-        for j in range(1, len_2 + 1):
-            array[i, j] = max(array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]],
-                              array[i - 1, j] + gap_penalty,
-                              array[i, j - 1] + gap_penalty)
-
-    max_score = array[len_1, len_2]
-    return array, max_score, len_1, len_2
-
-def traceback_global(array, sequence_1, sequence_2, gap_penalty):
-    aligned_seq_1 = ""
-    aligned_seq_2 = ""
-    i = len(sequence_1)
-    j = len(sequence_2)
-
-    while i > 0 or j > 0:
-        if i > 0 and j > 0 and array[i, j] == array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]]:
-            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
-            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
-            i -= 1
-            j -= 1
-        elif i > 0 and array[i, j] == array[i - 1, j] + gap_penalty:
-            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
-            aligned_seq_2 = '-' + aligned_seq_2
-            i -= 1
-        else:
-            aligned_seq_1 = '-' + aligned_seq_1
-            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
-            j -= 1
-
-    return aligned_seq_1, aligned_seq_2
-
-def traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty):
-    aligned_seq_1 = ""
-    aligned_seq_2 = ""
-    i = max_i
-    j = max_j
-
-    while array[i, j] != 0:
-        if array[i, j] == array[i - 1, j - 1] + BLOSUM62[sequence_1[i-1]][sequence_2[j-1]]:
-            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
-            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
-            i -= 1
-            j -= 1
-        elif array[i, j] == array[i - 1, j] + gap_penalty:
-            aligned_seq_1 = sequence_1[i - 1] + aligned_seq_1
-            aligned_seq_2 = '-' + aligned_seq_2
-            i -= 1
-        elif array[i, j] == array[i, j - 1] + gap_penalty:
-            aligned_seq_1 = '-' + aligned_seq_1
-            aligned_seq_2 = sequence_2[j - 1] + aligned_seq_2
-            j -= 1
-
-    start_i = i + 1  # Convert to 1-based index
-    start_j = j + 1  # Convert to 1-based index
-
-    return aligned_seq_1, aligned_seq_2, start_i, start_j
-#################################
-
-@app.route('/blosum')
-def blosum():
-    return render_template('blosum.html')
-
-@app.route('/blosum/align', methods=['POST'])
-def align():
-    sequence_1 = request.form['sequence1']
-    sequence_2 = request.form['sequence2']
-    gap_penalty = int(request.form['gap_penalty'])
-    alignment_type = request.form['alignment_type']
-
-    if alignment_type == 'local':
-        array, max_score, max_i, max_j = algoritmo_alineamiento_local(sequence_1, sequence_2, gap_penalty)
-        aligned_seq_1, aligned_seq_2, start_i, start_j = traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty)
-        return render_template('blosum.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
-                               aligned_seq_1=aligned_seq_1, aligned_seq_2=aligned_seq_2, max_score=max_score, start_i=start_i, start_j=start_j,
-                               score_matrix=array.tolist())
-    else:
-        array, max_score, _, _ = algoritmo_alineamiento_global(sequence_1, sequence_2, gap_penalty)
-        aligned_seq_1, aligned_seq_2 = traceback_global(array, sequence_1, sequence_2, gap_penalty)
-        return render_template('blosum.html', alignment_type=alignment_type, sequence_1=sequence_1, sequence_2=sequence_2,
-                               aligned_seq_1=aligned_seq_1, aligned_seq_2=aligned_seq_2, max_score=max_score,
-                               score_matrix=array.tolist())
 
 
 #####################################################
