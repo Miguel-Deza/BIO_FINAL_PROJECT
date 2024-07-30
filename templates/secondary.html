@@ -37,12 +37,25 @@
             border-radius: 5px;
             display: inline-block;
         }
-        .sequence {
-            color: #d9534f; /* Color rojo para la secuencia de ARN */
+        .sequence .A {
+            color: red;
+        }
+        .sequence .U {
+            color: blue;
+        }
+        .sequence .C {
+            color: green;
+        }
+        .sequence .G {
+            color: orange;
         }
         h1, h2, h3 {
             color: #20993e; /* Color cian para títulos y subtítulos */
         }
+        .highlight {
+    background-color: yellow; /* Cambia esto al color que prefieras para resaltar */
+    font-weight: bold;
+}
     </style>
 </head>
 <body>
@@ -60,8 +73,14 @@
 
             {% if sequence %}
             <div class="result card mt-5 p-4">
-                <h2 class="text-center">Resultados para la Secuencia: <span class="sequence">{{ sequence }}</span></h2>
-                <p class="text-center"><strong>Puntuación de Energía Mínima:</strong> {{ min_energy_score }}</p>
+                <h2 class="text-center">Resultados para la Secuencia: 
+                    <span class="sequence">
+                        {% for nucleotide in sequence %}
+                            <span class="{{ nucleotide }}">{{ nucleotide }}</span>
+                        {% endfor %}
+                    </span>
+                </h2>
+                <h3 class="text-center"><strong>Puntuación de Energía Mínima:</strong> {{ min_energy_score }}</h3>
 
                 <h3>Matriz de Energía:</h3>
                 <div class="matrix-table">
@@ -69,7 +88,7 @@
                         {% for row in energy_matrix %}
                         <tr>
                             {% for cell in row %}
-                            <td>{{ cell }}</td>
+                            <td class="{% if cell == min_energy_score %}highlight{% endif %}">{{ cell }}</td>
                             {% endfor %}
                         </tr>
                         {% endfor %}

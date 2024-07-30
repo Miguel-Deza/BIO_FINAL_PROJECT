@@ -215,17 +215,17 @@ var GridBuilder = (function () {
 
         var $tr = $("<tr />");
         $tr.append(
-            $("<td />").html("<b><u>Score from Diagonal cell</u></b> <br> " + targetCell.diagonalScoreText)
+            $("<td />").html("<b><u>Puntuación de la celda Diagonal</u></b> <br> " + targetCell.diagonalScoreText)
         ).append(
-            $("<td />").html("<b><u>Score from Upper cell</u></b> <br> " + targetCell.upScoreText)
+            $("<td />").html("<b><u>Puntuación de la celda superior</u></b> <br> " + targetCell.upScoreText)
         );
         $table.append($tr);
 
         $tr = $("<tr />");
         $tr.append(
-            $("<td />").html("<b><u>Score from Side cell</u></b> <br> " + targetCell.sideScoreText)
+            $("<td />").html("<b><u>Puntuación de la celda lateral</u></b> <br> " + targetCell.sideScoreText)
         ).append(
-            $("<td />").html("Winning (max) score is " + targetCell.winningScore)
+            $("<td />").html("La puntuación ganadora (máxima) es " + targetCell.winningScore)
         );
         $table.append($tr);
 
@@ -385,7 +385,7 @@ var GridBuilder = (function () {
             var pos = self.offset();
             var topMargin = self.hasClass("side-header")?self.height()/4:self.height() + 4;
             var leftMargin = self.hasClass("side-header")?self.width() + 4:0;
-            var text = self.hasClass("included")?"Included In Alignment":"Not Included In Alignment";
+            var text = self.hasClass("included")?"Incluido en la alineación":"No Incluido en la alineación";
             
             displayTooltip(text, pos.left + leftMargin, pos.top + topMargin );
             
@@ -548,12 +548,12 @@ var GridBuilder = (function () {
                     }
                     
                     mCellMap[i + "_" + j] = {
-                        'sideScoreText': mPathTable[i - 1][j] + " + " + gapScore + " (The Gap score) = " + moveSdScore,
-                        'upScoreText': mPathTable[i][j - 1] + " + " + gapScore + " (The Gap score) = " + moveUpScore,
+                        'sideScoreText': mPathTable[i - 1][j] + " + " + gapScore + " (La puntuación de la brecha) = " + moveSdScore,
+                        'upScoreText': mPathTable[i][j - 1] + " + " + gapScore + " (La puntuación de la brecha) = " + moveUpScore,
                         'diagonalScoreText': mPathTable[i - 1][j - 1]  + " + " +  
                             parseInt(comparisonScore, 10) +
-                            " (Due to a " + (isMatch ? "match" : "mismatch") +
-                            " between " + mTopSequence[i - 1] + " & " + mSideSequence[j - 1] + ") " +
+                            " (Debido a " + (isMatch ? "match" : "mismatch") +
+                            " entre " + mTopSequence[i - 1] + " & " + mSideSequence[j - 1] + ") " +
                             " = " +
                             moveDgScore,
                         'sideScore': moveSdScore,

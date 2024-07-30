@@ -39,7 +39,6 @@
         .T, .Thr {
             background-color: #ffcc99; /* Naranja claro para T */
         }
-        
     </style>
 </head>
 <body>
@@ -75,16 +74,42 @@
         {% if aligned_seq_1 and aligned_seq_2 %}
             <div class="mt-5 animate__animated animate__fadeIn">
                 <h2>Resultados</h2>
-                <p><strong>Tipo de alineamiento:</strong> {{ alignment_type }}</p>
-                <p><strong>Secuencia 1:</strong> <span class="{{ sequence_1 | slice(0, 1) }}">{{ sequence_1 }}</span></p>
-                <p><strong>Secuencia 2:</strong> <span class="{{ sequence_2 | slice(0, 1) }}">{{ sequence_2 }}</span></p>
-                <p><strong>Secuencia 1 alineada:</strong> <span class="{{ aligned_seq_1 | slice(0, 1) }}">{{ aligned_seq_1 }}</span></p>
-                <p><strong>Secuencia 2 alineada:</strong> <span class="{{ aligned_seq_2 | slice(0, 1) }}">{{ aligned_seq_2 }}</span></p>
-                <p><strong>Puntuación máxima:</strong> <span class="badge badge-success">{{ max_score }}</span></p>
-                {% if alignment_type == 'local' %}
-                    <p><strong>Posición de inicio en Secuencia 1:</strong> <span class="badge badge-info">{{ start_i }}</span></p>
-                    <p><strong>Posición de inicio en Secuencia 2:</strong> <span class="badge badge-info">{{ start_j }}</span></p>
-                {% endif %}
+                <table class="table table-striped">
+                    <tr>
+                        <th>Tipo de alineamiento:</th>
+                        <td>{{ alignment_type }}</td>
+                    </tr>
+                    <tr>
+                        <th>Secuencia 1:</th>
+                        <td>{% for char in sequence_1 %}<span class="{{ char }}">{{ char }}</span>{% endfor %}</td>
+                    </tr>
+                    <tr>
+                        <th>Secuencia 2:</th>
+                        <td>{% for char in sequence_2 %}<span class="{{ char }}">{{ char }}</span>{% endfor %}</td>
+                    </tr>
+                    <tr>
+                        <th>Secuencia 1 alineada:</th>
+                        <td>{% for char in aligned_seq_1 %}<span class="{{ char }}">{{ char }}</span>{% endfor %}</td>
+                    </tr>
+                    <tr>
+                        <th>Secuencia 2 alineada:</th>
+                        <td>{% for char in aligned_seq_2 %}<span class="{{ char }}">{{ char }}</span>{% endfor %}</td>
+                    </tr>
+                    <tr>
+                        <th>Puntuación máxima:</th>
+                        <td><span class="badge badge-success">{{ max_score }}</span></td>
+                    </tr>
+                    {% if alignment_type == 'local' %}
+                        <tr>
+                            <th>Posición de inicio en Secuencia 1:</th>
+                            <td><span class="badge badge-info">{{ start_i }}</span></td>
+                        </tr>
+                        <tr>
+                            <th>Posición de inicio en Secuencia 2:</th>
+                            <td><span class="badge badge-info">{{ start_j }}</span></td>
+                        </tr>
+                    {% endif %}
+                </table>
                 
                 <h2>Matriz de Puntuación</h2>
                 <div class="table-responsive">

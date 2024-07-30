@@ -1011,11 +1011,11 @@ def traceback(sequence, energy_matrix, alpha):
 
 
 def plot_structure(sequence, pairs):
-    plt.figure(figsize=(max(4, len(sequence) / 8), max(4, len(sequence) / 8)))
+    fig, ax = plt.subplots(figsize=(max(8, len(sequence) / 4), max(8, len(sequence) / 4)))
 
     G = nx.Graph()
     node_colors = []
-    base_color_map = {'A': '#FF0000', 'U': '#00FF00', 'C': '#0000FF', 'G': '#FFFF00'}
+    base_color_map = {'A': '#de4e4e', 'U': '#00FF00', 'C': '#00bbff', 'G': '#FFFF00'}
 
     for idx, base in enumerate(sequence):
         G.add_node(idx + 1, base=base, color=base_color_map[base])
@@ -1030,7 +1030,7 @@ def plot_structure(sequence, pairs):
     pos = nx.kamada_kawai_layout(G)
 
     nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500, edgecolors='black', linewidths=1.5)
-    nx.draw_networkx_labels(G, pos, labels={i: f"{i} ({G.nodes[i]['base']})" for i in G.nodes()}, font_size=10, font_color="black")
+    nx.draw_networkx_labels(G, pos, labels={i: f"{i} ({G.nodes[i]['base']})" for i in G.nodes()}, font_size=7, font_color="black")
 
     edges = G.edges()
     edge_colors = [G[u][v]['color'] for u, v in edges]

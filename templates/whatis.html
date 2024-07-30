@@ -46,6 +46,10 @@
         .btn-primary:focus {
             box-shadow: 0 0 5px rgba(56, 142, 60, 0.5);
         }
+        .operation-info {
+            margin-top: 10px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -64,12 +68,57 @@
                 La secuencia es {{ sequence_type }}
             </h2>
             {% if sequence_type == 'ADN' %}
+            <div class="operation-info">
+                <h3>Operaciones posibles:</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>Transcripción:</strong> Proceso por el cual una secuencia de ADN se copia en una molécula de ARN.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Replicación:</strong> Proceso de duplicación del ADN antes de la división celular.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Mutación:</strong> Alteración en la secuencia del ADN que puede resultar en cambios en la función genética.
+                    </li>
+                </ul>
+            </div>
             <img src="https://www.proferecursos.com/wp-content/uploads/Que-es-el-ADN.jpg" alt="ADN">
             {% elif sequence_type == 'ARN' %}
+            <div class="operation-info">
+                <h3>Operaciones posibles:</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>Traducción:</strong> Proceso en el que la secuencia de ARN se utiliza para sintetizar proteínas.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Retrotranscripción:</strong> Proceso en el que una secuencia de ARN se convierte nuevamente en ADN.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Degradación:</strong> Proceso por el cual las moléculas de ARN se descomponen y eliminan.
+                    </li>
+                </ul>
+            </div>
             <img src="https://www.proferecursos.com/wp-content/uploads/Que-es-el-ARN.jpg" alt="ARN">
             {% elif sequence_type == 'Proteína' %}
+            <div class="operation-info">
+                <h3>Operaciones posibles:</h3>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>Plegamiento:</strong> Proceso mediante el cual una proteína adquiere su estructura tridimensional funcional.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Modificación postraduccional:</strong> Cambios químicos en la proteína después de su síntesis.
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Degradación:</strong> Proceso de descomposición de proteínas en sus aminoácidos constituyentes.
+                    </li>
+                </ul>
+            </div>
             <img src="https://www.proferecursos.com/wp-content/uploads/Que-es-una-Proteina.jpg" alt="Proteína">
             {% else %}
+            <div class="operation-info">
+                <h3>No se pueden realizar operaciones.</h3>
+            </div>
             <img src="https://cdn-icons-png.flaticon.com/512/1179/1179196.png" alt="No Identificado">
             {% endif %}
         </div>

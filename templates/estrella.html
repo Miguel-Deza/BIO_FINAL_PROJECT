@@ -91,15 +91,30 @@ caacaagtaa
         </div>
 
         {% if sequences %}
-        <div class="fade-in">
-            <h2 class="mt-5">Secuencias de Entrada:</h2>
-            <ul class="list-group">
+<div class="fade-in">
+    <h2 class="mt-5">Secuencias de Entrada:</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Secuencia</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for sequence in sequences %}
-                <li class="list-group-item animate__animated animate__fadeInUp">{{ sequence }}</li>
+                <tr class="animate__animated animate__fadeInUp">
+                    <td><strong>Secuencia {{ loop.index }}</strong></td>
+                    <td><pre>{{ sequence }}</pre></td>
+                </tr>
                 {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+
 
         {% if pair_scores %}
         <div class="fade-in">
@@ -132,38 +147,72 @@ caacaagtaa
         {% endif %}
 
         {% if best_score %}
-        <div class="fade-in">
-            <h2 class="mt-5">Puntuación Máxima Obtenida:</h2>
-            <p class="lead"><strong>Secuencia S{{ star_pos + 1 }}</strong> con una puntuación de <strong>{{ best_score }}</strong></p>
-        </div>
-        {% endif %}
+<div class="fade-in">
+    <h2 class="mt-5">Puntuación Máxima Obtenida:</h2>
+    <div class="alert alert-success custom-border" role="alert">
+        <p class="lead"><strong>Secuencia S{{ star_pos + 1 }}</strong> con una puntuación de <strong>{{ best_score }}</strong></p>
+    </div>
+</div>
+{% endif %}
+
 
         {% if star_alignments %}
-        <div class="fade-in">
-            <h2 class="mt-5">Alineamientos con la Secuencia Estrella:</h2>
-            <ul class="list-group">
+<div class="fade-in">
+    <h2 class="mt-5">Alineamientos con la Secuencia Estrella:</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Secuencia</th>
+                    <th>Alineamientos</th>
+                    <th>Puntuación</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for star_alignment in star_alignments %}
-                <li class="list-group-item animate__animated animate__fadeInUp">
-                    <strong>S{{ star_alignment[2] + 1 }}</strong>:<br>
-                    {{ star_alignment[0] }}<br>
-                    {{ star_alignment[1] }}<br>
-                    <strong>Puntuación: </strong>{{ star_alignment[3] }}
-                </li>
+                <tr class="animate__animated animate__fadeInUp">
+                    <td><strong>S{{ star_alignment[2] + 1 }}</strong></td>
+                    <td>
+                        <pre>{{ star_alignment[0] }}</pre>
+                        <pre>{{ star_alignment[1] }}</pre>
+                    </td>
+                    <td><strong>{{ star_alignment[3] }}</strong></td>
+                </tr>
                 {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
 
+
+
+        
+<!-- ALINEAMIENTO MULTIPLE CUADRO -->
         {% if alignments %}
-        <div class="fade-in">
-            <h2 class="mt-5">Alineamiento Múltiple:</h2>
-            <ul class="list-group">
+<div class="fade-in">
+    <h2 class="mt-5">Alineamiento Múltiple:</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Secuencia</th>
+                    <th>Alineamiento</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for i in range(alignments|length) %}
-                <li class="list-group-item animate__animated animate__fadeInUp"><strong>S{{ i + 1 }}</strong>: {{ alignments[i] }}</li>
+                <tr class="animate__animated animate__fadeInUp">
+                    <td><strong>S{{ i + 1 }}</strong></td>
+                    <td><pre>{{ alignments[i] }}</pre></td>
+                </tr>
                 {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 
     </div>
 
