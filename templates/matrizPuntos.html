@@ -6,6 +6,36 @@
     <title>Matriz de Puntos</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        h1, h2, label {
+            animation: colorChange 5s infinite;
+        }
+
+        @keyframes colorChange {
+            0% { color: red; }
+            25% { color: blue; }
+            50% { color: green; }
+            75% { color: orange; }
+            100% { color: red; }
+        }
+
+        .btn-example {
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .btn-example:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #result {
+            display: none;
+        }
+
+        #dotmatrix-image {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
@@ -13,21 +43,37 @@
         <form id="dotmatrix-form" class="mt-4">
             <div class="form-group">
                 <label for="seq1">Secuencia 1:</label>
-                <input type="text" id="seq1" name="seq1" class="form-control" required>
+                <div class="input-group">
+                    <input type="text" id="seq1" name="seq1" class="form-control" required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary btn-example" type="button" onclick="setExample('seq1', 'ATGCGTAC')">Ejemplo: ATGCGTAC</button>
+                        <button class="btn btn-outline-secondary btn-example" type="button" onclick="setExample('seq1', 'CGTATGCG')">Ejemplo: CGTATGCG</button>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label for="seq2">Secuencia 2:</label>
-                <input type="text" id="seq2" name="seq2" class="form-control" required>
+                <div class="input-group">
+                    <input type="text" id="seq2" name="seq2" class="form-control" required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary btn-example" type="button" onclick="setExample('seq2', 'ATGCGTAC')">Ejemplo: ATGCGTAC</button>
+                        <button class="btn btn-outline-secondary btn-example" type="button" onclick="setExample('seq2', 'CGTATGCG')">Ejemplo: CGTATGCG</button>
+                    </div>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary btn-block">Generar Matriz</button>
         </form>
-        <div id="result" class="mt-4" style="display: none;">
+        <div id="result" class="mt-4">
             <h2 class="text-center">Resultado:</h2>
             <img id="dotmatrix-image" src="" alt="Matriz de Puntos" class="img-fluid mx-auto d-block">
         </div>
     </div>
 
     <script>
+        function setExample(inputId, value) {
+            document.getElementById(inputId).value = value;
+        }
+
         $(document).ready(function(){
             $('#dotmatrix-form').on('submit', function(event){
                 event.preventDefault();
@@ -37,10 +83,19 @@
                     data: $(this).serialize(),
                     success: function(data){
                         $('#dotmatrix-image').attr('src', 'data:image/png;base64,' + data.image);
-                        $('#result').show(); // Muestra la sección de resultado
+                        $('#result').fadeIn(1000);
+                        $('#dotmatrix-image').fadeIn(2000);
                     }
                 });
             });
+
+            $('.btn-example').hover(
+                function() {
+                    $(this).css({ backgroundColor: '#007bff', color: 'white' });
+                }, function() {
+                    $(this).css({ backgroundColor: '', color: '' });
+                }
+            );
         });
     </script>
 </body>

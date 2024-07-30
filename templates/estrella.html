@@ -9,26 +9,78 @@
     <style>
         body {
             padding-top: 20px;
+            background-color: #f8f9fa;
+            color: #343a40;
         }
-        .fade-in {
-            animation: fadeIn 2s;
+        h1 {
+            color: #007bff; /* Título principal */
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        h2 {
+            color: #259425; /* Subtítulo */
+        }
+        .form-group label {
+            font-size: 1.2rem;
+            color: #17a2b8;
+        }
+        .form-control {
+            font-size: 1rem;
+        }
+        .btn-primary {
+            background-color: #28a745;
+            border-color: #28a745;
+            font-size: 1.2rem;
+        }
+        .list-group-item {
+            background-color: #e9ecef;
+            color: #343a40;
+            font-size: 1.1rem;
+        }
+        pre {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .table thead th {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+        .table tbody td, .table tbody th {
+            font-size: 1rem;
+        }
+        .lead {
+            font-size: 1.3rem;
+            color: #dc3545;
+        }
+        strong {
+            color: #007bff;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-center mb-4">Star Alignment</h1>
-        <form method="post">
-            <div class="form-group">
-                <label for="sequences">Enter sequences separated by new line:</label>
-                <textarea class="form-control" id="sequences" name="sequences" rows="10" required></textarea>
+        <div class="row">
+            <div class="col-md-6">
+                <form method="post">
+                    <div class="form-group">
+                        <label for="sequences">Enter sequences separated by new line:</label>
+                        <textarea class="form-control" id="sequences" name="sequences" rows="10" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                </form>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Submit</button>
-        </form>
+            <div class="col-md-6">
+                <h2 class="mt-5">Sample Sequences:</h2>
+                <pre>
+atggaagcaa
+tatcactgat
+gactatacta
+ctggtggtaa
+caacaagtaa
+                </pre>
+            </div>
+        </div>
 
         {% if sequences %}
         <div class="fade-in">
@@ -105,12 +157,21 @@
         </div>
         {% endif %}
 
-        
     </div>
 
     <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            // Animación para los títulos
+            $("h1").hide().fadeIn(2000);
+            $("h2").hide().fadeIn(2000);
+            
+            // Animación para las secciones que aparecen
+            $(".fade-in").hide().slideDown(2000);
+        });
+    </script>
 </body>
 </html>
