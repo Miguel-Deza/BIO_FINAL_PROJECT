@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Hierarchical Clustering</title>
+    <title>Clustering Jerárquico</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
@@ -13,30 +13,74 @@
         .container {
             margin-top: 50px;
         }
+        .example-box {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .example-box pre {
+            margin: 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-5 animate__animated animate__fadeInDown">Hierarchical Clustering Input</h1>
+        <h1 class="text-center mb-5 animate__animated animate__fadeInDown">Entrada para Clustering Jerárquico</h1>
         <form action="/results" method="post">
-            <div class="form-group">
-                <label for="matrix">Enter the distance matrix (one row per line, values separated by spaces):</label>
-                <textarea class="form-control" id="matrix" name="matrix" rows="10"></textarea>
+            <div class="form-row">
+                <div class="form-group col-md-8">
+                    <label for="matrix">Ingresa la matriz de distancias (una fila por línea, valores separados por espacios):</label>
+                    <textarea class="form-control" id="matrix" name="matrix" rows="10"></textarea>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="example">Ejemplo:</label>
+                    <div class="example-box animate__animated animate__fadeInRight">
+                        <pre>0    2.15  0.70  1.07  0.85  1.16  1.56
+2.15 0     1.53  1.14  1.38  1.01  2.83
+0.70 1.53  0     0.43  0.21  0.55  1.86
+1.07 1.14  0.43  0     0.29  0.22  2.04
+0.85 1.38  0.21  0.29  0     0.41  2.02
+1.16 1.01  0.55  0.22  0.41  0     2.05
+1.56 2.83  1.86  2.04  2.02  2.05  0</pre>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
-                <label for="method">Select the clustering method:</label>
+                <label for="method">Selecciona el método de clustering:</label>
                 <select class="form-control" id="method" name="method">
-                    <option value="Minimum">Minimum</option>
-                    <option value="Maximum">Maximum</option>
-                    <option value="Average">Average</option>
-                    <option value="Compare">Compare All Methods</option>
+                    <option value="Minimum">Mínimo</option>
+                    <option value="Maximum">Máximo</option>
+                    <option value="Average">Promedio</option>
+                    <option value="Compare">Comparar Todos los Métodos</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary btn-block animate__animated animate__fadeInUp">Submit</button>
+            <button type="submit" class="btn btn-primary btn-block animate__animated animate__fadeInUp">Enviar</button>
         </form>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('form').hide().fadeIn(1500);
+
+            $('#matrix').focus(function() {
+                $(this).animate({height: '300px'}, 500);
+            });
+
+            $('#matrix').blur(function() {
+                $(this).animate({height: '200px'}, 500);
+            });
+
+            $('button[type="submit"]').hover(
+                function() {
+                    $(this).addClass('animate__heartBeat');
+                },
+                function() {
+                    $(this).removeClass('animate__heartBeat');
+                }
+            );
+        });
+    </script>
 </body>
 </html>
