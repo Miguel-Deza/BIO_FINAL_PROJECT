@@ -297,7 +297,6 @@ def traceback_local(array, sequence_1, sequence_2, max_i, max_j, gap_penalty):
     start_j = j + 1  # Convert to 1-based index
 
     return aligned_seq_1, aligned_seq_2, start_i, start_j
-#################################
 
 @app.route('/blosum')
 def blosum():

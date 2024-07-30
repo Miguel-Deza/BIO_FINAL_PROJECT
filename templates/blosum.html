@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sequence Alignment</title>
+    <title>Alineamiento de Secuencias</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         .highlight {
-            background-color: #ffff66; /* Light yellow for max score */
+            background-color: #ffff66; /* Amarillo claro para la puntuación máxima */
         }
         .path {
-            background-color: #66b2ff; /* Light blue for path */
+            background-color: #66b2ff; /* Azul claro para el camino */
         }
         .animate__animated {
             animation-duration: 2s;
@@ -27,61 +27,66 @@
                 opacity: 1;
             }
         }
-        .A {
-            background-color: #ff9999; /* Light red for A */
+        .A, .Ala {
+            background-color: #ff9999; /* Rojo claro para A */
         }
-        .C {
-            background-color: #99ff99; /* Light green for C */
+        .C, .Cys {
+            background-color: #99ff99; /* Verde claro para C */
         }
-        .G {
-            background-color: #9999ff; /* Light blue for G */
+        .G, .Gly {
+            background-color: #9999ff; /* Azul claro para G */
         }
-        .T {
-            background-color: #ffcc99; /* Light orange for T */
+        .T, .Thr {
+            background-color: #ffcc99; /* Naranja claro para T */
         }
+        
     </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center">Sequence Alignment</h1>
+        <h1 class="text-center">Alineamiento de Secuencias</h1>
         <form action="/blosum/align" method="post" class="mt-4">
             <div class="form-group">
-                <label for="sequence1">Sequence 1:</label>
+                <label for="sequence1">Secuencia 1:</label>
                 <input type="text" class="form-control" id="sequence1" name="sequence1" required>
+                <small class="form-text text-muted">Ejemplo: <code>AGCTGAC</code></small>
             </div>
             <div class="form-group">
-                <label for="sequence2">Sequence 2:</label>
+                <label for="sequence2">Secuencia 2:</label>
                 <input type="text" class="form-control" id="sequence2" name="sequence2" required>
+                <small class="form-text text-muted">Ejemplo: <code>GCTAGC</code></small>
             </div>
             <div class="form-group">
-                <label for="gap_penalty">Gap Penalty:</label>
+                <label for="gap_penalty">Penalización por gap:</label>
                 <input type="number" class="form-control" id="gap_penalty" name="gap_penalty" required>
+                <small class="form-text text-muted">Ejemplo: <code>-2</code></small>
             </div>
             <div class="form-group">
-                <label for="alignment_type">Alignment Type:</label>
+                <label for="alignment_type">Tipo de alineamiento:</label>
                 <select class="form-control" id="alignment_type" name="alignment_type" required>
                     <option value="local">Local</option>
                     <option value="global">Global</option>
                 </select>
+                <small class="form-text text-muted">Ejemplo: <code>Local</code></small>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Align</button>
+            <button type="submit" class="btn btn-primary btn-block">Alinear</button>
         </form>
-
+        
         {% if aligned_seq_1 and aligned_seq_2 %}
             <div class="mt-5 animate__animated animate__fadeIn">
-                <h2>Results</h2>
-                <p><strong>Alignment Type:</strong> {{ alignment_type }}</p>
-                <p><strong>Sequence 1:</strong> <span class="{{ sequence_1 | slice(0, 1) }}">{{ sequence_1 }}</span></p>
-                <p><strong>Sequence 2:</strong> <span class="{{ sequence_2 | slice(0, 1) }}">{{ sequence_2 }}</span></p>
-                <p><strong>Aligned Sequence 1:</strong> <span class="{{ aligned_seq_1 | slice(0, 1) }}">{{ aligned_seq_1 }}</span></p>
-                <p><strong>Aligned Sequence 2:</strong> <span class="{{ aligned_seq_2 | slice(0, 1) }}">{{ aligned_seq_2 }}</span></p>
-                <p><strong>Max Score:</strong> <span class="badge badge-success">{{ max_score }}</span></p>
+                <h2>Resultados</h2>
+                <p><strong>Tipo de alineamiento:</strong> {{ alignment_type }}</p>
+                <p><strong>Secuencia 1:</strong> <span class="{{ sequence_1 | slice(0, 1) }}">{{ sequence_1 }}</span></p>
+                <p><strong>Secuencia 2:</strong> <span class="{{ sequence_2 | slice(0, 1) }}">{{ sequence_2 }}</span></p>
+                <p><strong>Secuencia 1 alineada:</strong> <span class="{{ aligned_seq_1 | slice(0, 1) }}">{{ aligned_seq_1 }}</span></p>
+                <p><strong>Secuencia 2 alineada:</strong> <span class="{{ aligned_seq_2 | slice(0, 1) }}">{{ aligned_seq_2 }}</span></p>
+                <p><strong>Puntuación máxima:</strong> <span class="badge badge-success">{{ max_score }}</span></p>
                 {% if alignment_type == 'local' %}
-                    <p><strong>Start Position in Sequence 1:</strong> <span class="badge badge-info">{{ start_i }}</span></p>
-                    <p><strong>Start Position in Sequence 2:</strong> <span class="badge badge-info">{{ start_j }}</span></p>
+                    <p><strong>Posición de inicio en Secuencia 1:</strong> <span class="badge badge-info">{{ start_i }}</span></p>
+                    <p><strong>Posición de inicio en Secuencia 2:</strong> <span class="badge badge-info">{{ start_j }}</span></p>
                 {% endif %}
-
-                <h2>Score Matrix</h2>
+                
+                <h2>Matriz de Puntuación</h2>
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>

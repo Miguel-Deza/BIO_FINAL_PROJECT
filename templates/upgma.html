@@ -1,67 +1,118 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPGMA Tree Generator</title>
+    <title>Generador de Árbol UPGMA</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f0f8ff;
         }
         .container {
             margin-top: 50px;
         }
         h1 {
             margin-bottom: 30px;
+            color: #0056b3;
         }
         form {
             background: #fff;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
         .result-container {
             margin-top: 30px;
             background: #fff;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
         .result-container h2 {
             margin-bottom: 20px;
+            color: #0056b3;
         }
         .animate__animated.animate__fadeIn {
             --animate-duration: 1s;
+        }
+        .example-container {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .example-container h3 {
+            color: #17a2b8;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">UPGMA Tree Generator</h1>
-        <form method="POST" class="animate__animated animate__fadeIn">
-            <div class="form-group">
-                <label for="labels">Labels (comma-separated):</label>
-                <input type="text" id="labels" name="labels" class="form-control" required>
+        <h1 class="text-center">Generador de Árbol UPGMA</h1>
+        <div class="row">
+            <div class="col-md-8">
+                <form method="POST" class="animate__animated animate__fadeIn">
+                    <div class="form-group">
+                        <label for="labels">Etiquetas (separadas por comas):</label>
+                        <input type="text" id="labels" name="labels" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dist_matrix">Matriz de Distancias (filas separadas por espacios, nueva línea para cada fila):</label>
+                        <textarea id="dist_matrix" name="dist_matrix" rows="4" class="form-control" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Generar Árbol</button>
+                </form>
+                {% if tree_structure %}
+                    <div class="result-container animate__animated animate__fadeInUp">
+                        <h2>Estructura del Árbol</h2>
+                        <pre>{{ tree_structure }}</pre>
+                        <h2>Imagen del Árbol</h2>
+                        <img src="data:image/png;base64,{{ tree_image }}" alt="Árbol UPGMA" class="img-fluid">
+                    </div>
+                {% endif %}
             </div>
-            <div class="form-group">
-                <label for="dist_matrix">Distance Matrix (space-separated rows, new line for each row):</label>
-                <textarea id="dist_matrix" name="dist_matrix" rows="4" class="form-control" required></textarea>
+            <div class="col-md-4">
+                <div class="example-container">
+                    <h3>Ejemplo de Entrada</h3>
+                    <p><strong>Etiquetas:</strong> A,B,C,D</p>
+                    <p><strong>Matriz de Distancias:</strong></p>
+                    <pre>0  8  7  12
+8  0  9  14
+7  9  0  11
+12  14  11  0</pre>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Generate Tree</button>
-        </form>
-        {% if tree_structure %}
-            <div class="result-container animate__animated animate__fadeInUp">
-                <h2>Tree Structure</h2>
-                <pre>{{ tree_structure }}</pre>
-                <h2>Tree Image</h2>
-                <img src="data:image/png;base64,{{ tree_image }}" alt="UPGMA Tree" class="img-fluid">
-            </div>
-        {% endif %}
+        </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $('form').hover(function(){
+                $(this).addClass('animate__pulse');
+            }, function(){
+                $(this).removeClass('animate__pulse');
+            });
+
+            $('#labels').focus(function(){
+                $(this).css('background-color', '#d1ecf1');
+            }).blur(function(){
+                $(this).css('background-color', '#ffffff');
+            });
+
+            $('#dist_matrix').focus(function(){
+                $(this).css('background-color', '#d1ecf1');
+            }).blur(function(){
+                $(this).css('background-color', '#ffffff');
+            });
+
+            $('button').click(function(){
+                $('form').addClass('animate__hinge');
+            });
+        });
+    </script>
 </body>
 </html>
