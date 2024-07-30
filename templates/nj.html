@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neighbor Joining Tree</title>
+    <title>Árbol de Unión de Vecinos</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         body {
-            background-color: #f8f9fa;
+            /* background-color: #f1f8e9; */
         }
         .container {
             margin-top: 50px;
@@ -17,12 +18,13 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .btn-submit {
-            background-color: #007bff;
+            background-color: #28a745;
             color: white;
             transition: background-color 0.3s ease;
+            border-radius: 5px;
         }
         .btn-submit:hover {
-            background-color: #0056b3;
+            background-color: #1e88e5;
         }
         .result {
             margin-top: 30px;
@@ -38,10 +40,10 @@
             border: 1px solid #ccc;
             padding: 10px;
             border-radius: 5px;
-            background-color: #e9ecef;
+            background-color: #d1ecf1;
         }
         h1, h2, label {
-            color: #343a40;
+            color: #17a2b8;
         }
         .example, .example div {
             color: #495057;
@@ -52,25 +54,25 @@
     <div class="container">
         <div class="card">
             <div class="card-body">
-                <h1 class="card-title text-center">Neighbor Joining Tree</h1>
+                <h1 class="card-title text-center">Árbol de Unión de Vecinos</h1>
                 <form action="{{ url_for('nj') }}" method="post">
                     <div class="form-row">
                         <div class="form-group col-md-8">
-                            <label for="labels">Labels (comma separated):</label>
+                            <label for="labels">Etiquetas (separadas por comas):</label>
                             <input type="text" class="form-control" id="labels" name="labels" required>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Example Labels:</label>
+                            <label>Etiquetas de Ejemplo:</label>
                             <div class="example">A,B,C,D,E,F</div>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group col-md-8">
-                            <label for="data">Distance Matrix (space separated, each row on a new line):</label>
+                            <label for="data">Matriz de Distancias (separada por espacios, cada fila en una nueva línea):</label>
                             <textarea class="form-control" id="data" name="data" rows="10" required></textarea>
                         </div>
                         <div class="form-group col-md-4">
-                            <label>Example Data:</label>
+                            <label>Datos de Ejemplo:</label>
                             <div class="example">
                                 0 0 0 0 0 0<br>
                                 5 0 0 0 0 0<br>
@@ -81,12 +83,12 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-submit btn-block">Submit</button>
+                    <button type="submit" class="btn btn-submit btn-block animate__animated animate__fadeInUp">Enviar</button>
                 </form>
                 {% if plot_url %}
                 <div class="result text-center fade-in">
-                    <h2 class="mt-4">Result</h2>
-                    <img src="data:image/png;base64,{{ plot_url }}" class="img-fluid mt-3" alt="Neighbor Joining Tree">
+                    <h2 class="mt-4">Resultado</h2>
+                    <img src="data:image/png;base64,{{ plot_url }}" class="img-fluid mt-3" alt="Árbol de Unión de Vecinos">
                 </div>
                 {% endif %}
             </div>
@@ -100,9 +102,9 @@
             $('.card-title, label').css('color', '#17a2b8');
             $('.example').css('background-color', '#d1ecf1');
             $('.btn-submit').hover(function() {
-                $(this).animate({ backgroundColor: "#0056b3" }, 300);
+                $(this).css('background-color', '#1e88e5');
             }, function() {
-                $(this).animate({ backgroundColor: "#007bff" }, 300);
+                $(this).css('background-color', '#28a745');
             });
         });
     </script>

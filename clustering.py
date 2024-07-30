@@ -1,3 +1,5 @@
+import base64
+import io
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
@@ -74,7 +76,7 @@ def compute_cophenetic_coefficient(matrix, cophenetic_matrix):
     return ccc
 
 
-def draw_dendrograms(clusters_list, distances_list, methods, save_filename=None):
+def draw_dendrograms(clusters_list, distances_list, methods):
     plt.figure(figsize=(18, 6))
     for index, (clusters, distances, method) in enumerate(zip(clusters_list, distances_list, methods)):
         Z = []
@@ -87,19 +89,19 @@ def draw_dendrograms(clusters_list, distances_list, methods, save_filename=None)
         plt.subplot(1, 3, index + 1)
         plt.title(f'Method: {method}')
         plt.xlabel('Cluster')
-        dendro = dendrogram(Z, color_threshold=0,
-                            link_color_func=lambda k: 'red')
+        dendro = dendrogram(Z, color_threshold=0, link_color_func=lambda k: 'red')
 
         for i, d, coord in zip(range(len(Z)), Z[:, 2], dendro['icoord']):
             y = d
-            plt.text((coord[1] + coord[2]) / 2, y,
-                     f'{d:.2f}', ha='center', va='bottom', color='black')
+            plt.text((coord[1] + coord[2]) / 2, y, f'{d:.2f}', ha='center', va='bottom', color='black')
 
         plt.gca().axes.get_yaxis().set_visible(False)
 
-    if save_filename:
-        plt.savefig(save_filename)
-    # plt.show()
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+    return base64.b64encode(img.getvalue()).decode('utf8')
 
 
 def hierarchical_clustering(matrix, method):

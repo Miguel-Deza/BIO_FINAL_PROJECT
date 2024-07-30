@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Identify Sequence Type</title>
+    <title>Identificar Tipo de Secuencia</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         body {
-            background-color: #f7f7f7;
+            background-color: #f1f8e9;
         }
         .container {
             margin-top: 50px;
@@ -31,23 +32,36 @@
             max-width: 100%;
             height: auto;
             margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .btn-primary {
+            background-color: #388e3c;
+            border-color: #2e7d32;
+        }
+        .btn-primary:hover {
+            background-color: #2e7d32;
+            border-color: #1b5e20;
+        }
+        .btn-primary:focus {
+            box-shadow: 0 0 5px rgba(56, 142, 60, 0.5);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">Identify Sequence Type</h1>
+        <h1 class="text-center animate__animated animate__fadeInDown" style="color: #388e3c;">Identificar Tipo de Secuencia</h1>
         <form method="post">
             <div class="form-group">
-                <label for="sequence">Enter Sequence</label>
+                <label for="sequence">Ingresa la Secuencia</label>
                 <input type="text" class="form-control" id="sequence" name="sequence" required>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+            <button type="submit" class="btn btn-primary btn-block animate__animated animate__fadeInUp">Enviar</button>
         </form>
         {% if sequence_type %}
-        <div class="result text-center">
+        <div class="result text-center animate__animated animate__fadeInUp">
             <h2 class="{% if sequence_type == 'ADN' %}adn{% elif sequence_type == 'ARN' %}arn{% elif sequence_type == 'Proteína' %}protein{% else %}unknown{% endif %}">
-                The sequence is {{ sequence_type }}
+                La secuencia es {{ sequence_type }}
             </h2>
             {% if sequence_type == 'ADN' %}
             <img src="https://www.proferecursos.com/wp-content/uploads/Que-es-el-ADN.jpg" alt="ADN">
@@ -61,8 +75,30 @@
         </div>
         {% endif %}
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('form').hide().fadeIn(1500);
+
+            $('#sequence').focus(function() {
+                $(this).animate({height: '50px'}, 500);
+            });
+
+            $('#sequence').blur(function() {
+                $(this).animate({height: '38px'}, 500);
+            });
+
+            $('button[type="submit"]').hover(
+                function() {
+                    $(this).addClass('animate__heartBeat');
+                },
+                function() {
+                    $(this).removeClass('animate__heartBeat');
+                }
+            );
+        });
+    </script>
 </body>
 </html>

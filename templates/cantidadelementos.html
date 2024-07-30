@@ -1,38 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sequence Element Counter</title>
+    <title>Contador de Elementos de Secuencia</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f1f8e9;
             color: #343a40;
         }
         .container {
             margin-top: 50px;
         }
         .header {
-            background-color: #17a2b8;
+            background-color: #43a047;
             color: white;
             padding: 20px;
             border-radius: 10px;
         }
         .form-control {
             border-radius: 5px;
-            border: 2px solid #17a2b8;
+            border: 2px solid #43a047;
         }
         .btn-primary {
-            background-color: #007bff;
+            background-color: #1e88e5;
             border: none;
             border-radius: 5px;
         }
         .btn-primary:hover {
-            background-color: #0056b3;
+            background-color: #1565c0;
         }
         .result {
-            background-color: #ffc107;
+            background-color: #ffca28;
             color: #212529;
             padding: 20px;
             border-radius: 10px;
@@ -42,25 +43,47 @@
 </head>
 <body>
     <div class="container">
-        <div class="header text-center">
-            <h1>Sequence Element Counter</h1>
+        <div class="header text-center animate__animated animate__fadeInDown">
+            <h1>Contador de Elementos de Secuencia</h1>
         </div>
         <form method="post" class="mt-4">
             <div class="form-group">
-                <label for="sequence">Enter your sequence (ARN, ADN, or Protein):</label>
+                <label for="sequence">Ingresa tu secuencia (ARN, ADN, o Proteína):</label>
                 <textarea class="form-control" id="sequence" name="sequence" rows="4" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Count Elements</button>
+            <button type="submit" class="btn btn-primary btn-block animate__animated animate__fadeInUp">Contar Elementos</button>
         </form>
         {% if sequence %}
-        <div class="result text-center mt-4">
-            <h3>Sequence: {{ sequence }}</h3>
-            <p>Number of elements: <strong>{{ count }}</strong></p>
+        <div class="result text-center mt-4 animate__animated animate__fadeInUp">
+            <h3>Secuencia: {{ sequence }}</h3>
+            <p>Número de elementos: <strong>{{ count }}</strong></p>
         </div>
         {% endif %}
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('form').hide().fadeIn(1500);
+
+            $('#sequence').focus(function() {
+                $(this).animate({height: '150px'}, 500);
+            });
+
+            $('#sequence').blur(function() {
+                $(this).animate({height: '100px'}, 500);
+            });
+
+            $('button[type="submit"]').hover(
+                function() {
+                    $(this).addClass('animate__heartBeat');
+                },
+                function() {
+                    $(this).removeClass('animate__heartBeat');
+                }
+            );
+        });
+    </script>
 </body>
 </html>

@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Star Alignment</title>
+    <title>Alineamiento de Secuencias</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         body {
             padding-top: 20px;
-            background-color: #f8f9fa;
+            /* background-color: #f1f8e9; */
             color: #343a40;
         }
         h1 {
@@ -24,11 +25,18 @@
         }
         .form-control {
             font-size: 1rem;
+            border-radius: 5px;
+            border: 2px solid #43a047;
         }
         .btn-primary {
             background-color: #28a745;
             border-color: #28a745;
             font-size: 1.2rem;
+            border-radius: 5px;
+        }
+        .btn-primary:hover {
+            background-color: #1e88e5;
+            border-color: #1e88e5;
         }
         .list-group-item {
             background-color: #e9ecef;
@@ -59,20 +67,20 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-4">Star Alignment</h1>
+        <h1 class="text-center mb-4 animate__animated animate__fadeInDown">Alineamiento de Estrellas</h1>
         <div class="row">
             <div class="col-md-6">
                 <form method="post">
                     <div class="form-group">
-                        <label for="sequences">Enter sequences separated by new line:</label>
+                        <label for="sequences">Ingresa las secuencias separadas por una nueva línea:</label>
                         <textarea class="form-control" id="sequences" name="sequences" rows="10" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                    <button type="submit" class="btn btn-primary btn-block animate__animated animate__fadeInUp">Enviar</button>
                 </form>
             </div>
             <div class="col-md-6">
-                <h2 class="mt-5">Sample Sequences:</h2>
-                <pre>
+                <h2 class="mt-5">Secuencias de Ejemplo:</h2>
+                <pre class="animate__animated animate__fadeInRight">
 atggaagcaa
 tatcactgat
 gactatacta
@@ -84,10 +92,10 @@ caacaagtaa
 
         {% if sequences %}
         <div class="fade-in">
-            <h2 class="mt-5">Input Sequences:</h2>
+            <h2 class="mt-5">Secuencias de Entrada:</h2>
             <ul class="list-group">
                 {% for sequence in sequences %}
-                <li class="list-group-item">{{ sequence }}</li>
+                <li class="list-group-item animate__animated animate__fadeInUp">{{ sequence }}</li>
                 {% endfor %}
             </ul>
         </div>
@@ -95,7 +103,7 @@ caacaagtaa
 
         {% if pair_scores %}
         <div class="fade-in">
-            <h2 class="mt-5">Matrix of Scores:</h2>
+            <h2 class="mt-5">Matriz de Puntuaciones:</h2>
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead class="thead-dark">
@@ -104,7 +112,7 @@ caacaagtaa
                             {% for i in range(pair_scores|length - 1) %}
                             <th>S{{ i + 1 }}</th>
                             {% endfor %}
-                            <th>Total Score</th>
+                            <th>Puntuación Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -125,21 +133,21 @@ caacaagtaa
 
         {% if best_score %}
         <div class="fade-in">
-            <h2 class="mt-5">Maximum Score Obtained:</h2>
-            <p class="lead"><strong>Sequence S{{ star_pos + 1 }}</strong> with a score of <strong>{{ best_score }}</strong></p>
+            <h2 class="mt-5">Puntuación Máxima Obtenida:</h2>
+            <p class="lead"><strong>Secuencia S{{ star_pos + 1 }}</strong> con una puntuación de <strong>{{ best_score }}</strong></p>
         </div>
         {% endif %}
 
         {% if star_alignments %}
         <div class="fade-in">
-            <h2 class="mt-5">Alignments with Star Sequence:</h2>
+            <h2 class="mt-5">Alineamientos con la Secuencia Estrella:</h2>
             <ul class="list-group">
                 {% for star_alignment in star_alignments %}
-                <li class="list-group-item">
+                <li class="list-group-item animate__animated animate__fadeInUp">
                     <strong>S{{ star_alignment[2] + 1 }}</strong>:<br>
                     {{ star_alignment[0] }}<br>
                     {{ star_alignment[1] }}<br>
-                    <strong>Score: </strong>{{ star_alignment[3] }}
+                    <strong>Puntuación: </strong>{{ star_alignment[3] }}
                 </li>
                 {% endfor %}
             </ul>
@@ -148,10 +156,10 @@ caacaagtaa
 
         {% if alignments %}
         <div class="fade-in">
-            <h2 class="mt-5">Multiple Alignment:</h2>
+            <h2 class="mt-5">Alineamiento Múltiple:</h2>
             <ul class="list-group">
                 {% for i in range(alignments|length) %}
-                <li class="list-group-item"><strong>S{{ i + 1 }}</strong>: {{ alignments[i] }}</li>
+                <li class="list-group-item animate__animated animate__fadeInUp"><strong>S{{ i + 1 }}</strong>: {{ alignments[i] }}</li>
                 {% endfor %}
             </ul>
         </div>

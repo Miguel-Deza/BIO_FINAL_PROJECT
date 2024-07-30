@@ -731,30 +731,24 @@ def nj():
 def clusterizacion():
     return render_template('form.html')
 
-
 @app.route('/results', methods=['POST'])
 def results():
     data = request.form['matrix']
     method = request.form['method']
 
     # Convert the input string into a matrix
-    distance_matrix = np.array(
-        [[float(num) for num in line.split()] for line in data.strip().split('\n')])
+    distance_matrix = np.array([[float(num) for num in line.split()] for line in data.strip().split('\n')])
 
     if method == 'Compare':
-        # Compare all methods
         methods = ['Minimum', 'Maximum', 'Average']
         results = {}
         clusters_list = []
         distances_list = []
 
         for method in methods:
-            clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(
-                distance_matrix, method)
-            ccc = compute_cophenetic_coefficient(
-                distance_matrix, cophenetic_matrix)
-            results[method] = (clustering_result, matrices,
-                               min_distances, cophenetic_matrix, ccc)
+            clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(distance_matrix, method)
+            ccc = compute_cophenetic_coefficient(distance_matrix, cophenetic_matrix)
+            results[method] = (clustering_result, matrices, min_distances, cophenetic_matrix, ccc)
             clusters_list.append(clustering_result)
             distances_list.append(min_distances)
 
@@ -762,30 +756,17 @@ def results():
         best_ccc = results[best_method][4]
 
         # Draw the dendrogram
-        draw_dendrograms(clusters_list, distances_list, methods,
-                         save_filename='static/images/combined_dendrograms.png')
+        dendrogram_img = draw_dendrograms(clusters_list, distances_list, methods)
 
-        return render_template('compare_results.html',
-                               results=results,
-                               best_method=best_method,
-                               best_ccc=best_ccc)
+        return render_template('compare_results.html', results=results, best_method=best_method, best_ccc=best_ccc, dendrogram_img=dendrogram_img)
     else:
-        # Perform clustering for the selected method
-        clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(
-            distance_matrix, method)
-        ccc = compute_cophenetic_coefficient(
-            distance_matrix, cophenetic_matrix)
+        clustering_result, matrices, min_distances, cophenetic_matrix = hierarchical_clustering(distance_matrix, method)
+        ccc = compute_cophenetic_coefficient(distance_matrix, cophenetic_matrix)
 
         # Draw the dendrogram
-        draw_dendrograms([clustering_result], [min_distances], [
-                         method], save_filename='static/images/combined_dendrograms.png')
+        dendrogram_img = draw_dendrograms([clustering_result], [min_distances], [method])
 
-        return render_template('results.html',
-                               clusters=clustering_result,
-                               min_distances=min_distances,
-                               cophenetic_matrix=cophenetic_matrix,
-                               ccc=ccc,
-                               method=method)
+        return render_template('results.html', clusters=clustering_result, min_distances=min_distances, cophenetic_matrix=cophenetic_matrix, ccc=ccc, method=method, dendrogram_img=dendrogram_img)
 
 #####################################################
 ######### ARBOL ENRAIZADO ############

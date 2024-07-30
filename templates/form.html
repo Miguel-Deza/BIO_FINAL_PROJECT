@@ -8,24 +8,41 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f1f8e9;
         }
         .container {
             margin-top: 50px;
         }
         .example-box {
-            background-color: #e9ecef;
+            background-color: #dcedc8;
             padding: 15px;
             border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .example-box pre {
             margin: 0;
+            color: #388e3c;
+        }
+        .form-control:focus {
+            border-color: #388e3c;
+            box-shadow: 0 0 5px rgba(56, 142, 60, 0.5);
+        }
+        .btn-primary {
+            background-color: #388e3c;
+            border-color: #2e7d32;
+        }
+        .btn-primary:hover {
+            background-color: #2e7d32;
+            border-color: #1b5e20;
+        }
+        .btn-primary:focus {
+            box-shadow: 0 0 5px rgba(56, 142, 60, 0.5);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center mb-5 animate__animated animate__fadeInDown">Entrada para Clustering Jerárquico</h1>
+        <h1 class="text-center mb-5 animate__animated animate__fadeInDown" style="color: #388e3c;">Entrada para Clustering Jerárquico</h1>
         <form action="/results" method="post">
             <div class="form-row">
                 <div class="form-group col-md-8">
